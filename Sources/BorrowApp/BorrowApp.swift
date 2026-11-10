@@ -4,6 +4,7 @@ import Darwin
 import Foundation
 import Observation
 import SwiftUI
+import UniformTypeIdentifiers
 
 @MainActor @Observable
 final class BorrowModel {
@@ -14,6 +15,7 @@ final class BorrowModel {
     var error: String?
     private var process: Process?
     private var launchLog: FileHandle?
+    private var runsBeforeLaunch: Set<UUID>?
     var selected: RunRecord? { runs.first { $0.id == selectedID } ?? runs.first }
     var isRunning: Bool { process?.isRunning == true }
 
@@ -23,18 +25,40 @@ final class BorrowModel {
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             let folders = try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
             runs = folders.compactMap { try? RecordingStore.read(from: $0) }.sorted { $0.startedAt > $1.startedAt }
-            if selectedID == nil { selectedID = runs.first?.id }
+            if let previous = runsBeforeLaunch {
+                if let created = runs.first(where: { !previous.contains($0.id) }) {
+                    selectedID = created.id; runsBeforeLaunch = nil
+                }
+            } else if selectedID == nil { selectedID = runs.first?.id }
             if let process, !process.isRunning {
                 if process.terminationStatus != 0 && process.terminationStatus != 130 {
                     error = "Recorder exited \(process.terminationStatus). Check the latest recording and recorder.log."
                 }
                 self.process = nil
+                runsBeforeLaunch = nil
                 try? launchLog?.close(); launchLog = nil
             }
         } catch { self.error = error.localizedDescription }
     }
 
     func start() {
+        launch(["rehearse", "--duration", String(duration)])
+    }
+
+    func observeCodex() {
+        guard !isRunning else { return }
+        let panel = NSOpenPanel()
+        panel.title = "Choose one Codex session log"
+        panel.message = "Borrow reads this log locally and keeps lifecycle events only. Prompts, reasoning, tool arguments and output are discarded. This experimental adapter does not infer approvals or control the agent."
+        panel.canChooseDirectories = false; panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [UTType(filenameExtension: "jsonl") ?? .data]
+        panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex/sessions")
+        if panel.runModal() == .OK, let url = panel.url {
+            launch(["observe-codex", "--session", url.path, "--timeout", String(duration)])
+        }
+    }
+
+    private func launch(_ arguments: [String]) {
         guard !isRunning else { return }
         error = nil
         let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/borrow")
@@ -50,9 +74,10 @@ final class BorrowModel {
             if !FileManager.default.fileExists(atPath: log.path) { FileManager.default.createFile(atPath: log.path, contents: nil) }
             launchLog = try FileHandle(forWritingTo: log); try launchLog?.truncate(atOffset: 0)
             let child = Process(); child.executableURL = cli
-            child.arguments = ["rehearse", "--duration", String(duration)] + (networkEnabled ? ["--network"] : [])
+            child.arguments = arguments + (networkEnabled ? ["--network"] : [])
             child.standardOutput = launchLog; child.standardError = launchLog
-            try child.run(); process = child; selectedID = nil
+            try child.run(); process = child
+            runsBeforeLaunch = Set(runs.map(\.id)); selectedID = nil
         } catch { self.error = error.localizedDescription }
     }
 
@@ -89,12 +114,12 @@ struct BorrowApp: App {
         }
         .defaultSize(width: 1120, height: 780)
         MenuBarExtra("Borrow", systemImage: model.isRunning ? "circle.dotted.circle.fill" : "moon.circle") {
-            Text(model.isRunning ? "Rehearsal recording" : "Borrow · Ready to rehearse")
+            Text(model.isRunning ? "Recording" : "Borrow · Ready to rehearse")
             Button("Open Borrow") {
                 NSApplication.shared.activate(ignoringOtherApps: true)
                 NSApplication.shared.windows.first { $0.canBecomeMain }?.makeKeyAndOrderFront(nil)
             }
-            if model.isRunning { Button("Cancel rehearsal") { model.cancel() } }
+            if model.isRunning { Button("Stop recording") { model.cancel() } }
             Divider()
             Text("Borrow does not prevent sleep.")
             Button("Quit Borrow") { NSApplication.shared.terminate(nil) }
@@ -111,7 +136,11 @@ final class BorrowDelegate: NSObject, NSApplicationDelegate {
 
 struct BorrowWindow: View {
     @Bindable var model: BorrowModel
-    private let accent = Color(red: 0.69, green: 0.39, blue: 0.08)
+    private let accent = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.96, green: 0.70, blue: 0.32, alpha: 1)
+            : NSColor(srgbRed: 0.59, green: 0.31, blue: 0.04, alpha: 1)
+    })
     var body: some View {
         NavigationSplitView {
             VStack(alignment: .leading, spacing: 20) {
@@ -128,11 +157,11 @@ struct BorrowWindow: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(run.title).font(.headline)
                             Text(run.startedAt, format: .dateTime.month(.abbreviated).day().hour().minute()).font(.caption).foregroundStyle(.secondary)
-                            Text(run.status.rawValue.capitalized).font(.caption).foregroundStyle(run.status == .running ? accent : .secondary)
+                            Text(run.statusLabel).font(.caption).foregroundStyle(.secondary)
                         }.padding(.vertical, 5).tag(run.id)
                     }
                 }.listStyle(.sidebar)
-                Text("Local prototype · 0.1\nNo sleep settings changed.")
+                Text("Local prototype · 0.2\nNo sleep settings changed.")
                     .font(.caption).foregroundStyle(.secondary).padding(12)
             }
             .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 300)
@@ -179,8 +208,9 @@ struct BorrowWindow: View {
                 Spacer()
                 if model.isRunning {
                     ProgressView().controlSize(.small)
-                    Button("Cancel") { model.cancel() }
+                    Button("Stop recording") { model.cancel() }
                 } else {
+                    Button("Observe Codex…") { model.observeCodex() }.controlSize(.large)
                     Button("Start rehearsal", systemImage: "play.fill") { model.start() }
                         .buttonStyle(.borderedProminent).controlSize(.large)
                 }
@@ -197,16 +227,21 @@ struct BorrowWindow: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(run.title).font(.title2.weight(.semibold))
                 Spacer()
-                Text(run.status.rawValue.capitalized).font(.callout.weight(.medium)).foregroundStyle(.secondary)
+                Text(run.statusLabel).font(.callout.weight(.medium)).foregroundStyle(.secondary)
             }
             if run.status == .running {
                 let age = Date().timeIntervalSince(run.observations.last?.time ?? run.startedAt)
-                Label(age > 10 ? "Recorder has not sampled recently; its condition is unknown." : "Recording. Close the lid, wait, then reopen to review.",
+                Label(age > 10 ? "Recorder has not sampled recently; its condition is unknown." : run.kind == .codexSession ? "Observing new Codex events. Borrow does not control the agent." : "Recording. Close the lid, wait, then reopen to review.",
                       systemImage: age > 10 ? "questionmark.circle" : "record.circle")
                     .foregroundStyle(accent)
             }
             HStack(spacing: 32) {
-                metric("Worker ticks while closed", value: "\(run.closedLidHeartbeats)")
+                if run.kind == .codexSession {
+                    metric("New agent events", value: "\(run.agent?.activityCount ?? 0)")
+                    metric("Events while closed", value: "\(run.closedLidAgentEvents)")
+                } else {
+                    metric("Worker ticks while closed", value: "\(run.closedLidHeartbeats)")
+                }
                 metric("Samples", value: "\(run.observations.count)")
                 metric("Last lid state", value: run.observations.last?.lidClosed.map { $0 ? "Closed" : "Open" } ?? "Unknown")
             }.padding(.vertical, 8)

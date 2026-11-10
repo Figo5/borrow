@@ -31,9 +31,9 @@ These are documented claims and positioning, not hands-on benchmarks. Absence fr
 
 ## Prototype scope
 
-Implemented: native window/menu, bounded independent-worker rehearsal, foreground command recording, lid polling, macOS sleep/wake notifications, battery and thermal observations, optional Apple connectivity probe, local JSON, Markdown export, and evidence rules.
+Implemented: native window/menu, bounded independent-worker rehearsal, foreground command recording, opt-in read-only Codex session observation, lid polling, macOS sleep/wake notifications, battery and thermal observations, optional Apple connectivity probe, local JSON, Markdown export, and evidence rules.
 
-Not implemented: global keep-awake control, power-setting restoration tests, provider-specific connection health, agent progress/approval adapters, automatic recovery, recursive process cleanup, semantic acceptance criteria, signed distribution, or a public compatibility promise.
+Not implemented: global keep-awake control, power-setting restoration tests, provider-specific connection health, approval-state adapters, automatic recovery, recursive process cleanup, semantic acceptance criteria, Developer ID signed distribution, or a public compatibility promise. The Codex adapter records whitelisted log events; it does not establish task correctness or infer stuck/waiting states.
 
 ## Validate the opportunity
 

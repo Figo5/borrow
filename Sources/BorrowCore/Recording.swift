@@ -1,7 +1,7 @@
 import Foundation
 
 public enum RunStatus: String, Codable { case running, completed, cancelled, interrupted, timedOut }
-public enum RunKind: String, Codable { case rehearsal, command }
+public enum RunKind: String, Codable { case rehearsal, command, codexSession }
 public enum CheckState: String, Codable { case observed, failed, unverified, skipped }
 
 public struct MachineSample: Codable, Identifiable {
@@ -12,10 +12,13 @@ public struct MachineSample: Codable, Identifiable {
     public var networkReachable: Bool?
     public var thermalState: String
     public var batteryPercent: Int?
+    public var agentActivityCount: Int?
     public init(time: Date, lidClosed: Bool?, heartbeat: Int? = nil,
-                networkReachable: Bool? = nil, thermalState: String = "unknown", batteryPercent: Int? = nil) {
+                networkReachable: Bool? = nil, thermalState: String = "unknown", batteryPercent: Int? = nil,
+                agentActivityCount: Int? = nil) {
         self.time = time; self.lidClosed = lidClosed; self.heartbeat = heartbeat
         self.networkReachable = networkReachable; self.thermalState = thermalState; self.batteryPercent = batteryPercent
+        self.agentActivityCount = agentActivityCount
     }
 }
 
@@ -47,7 +50,7 @@ public struct WorkerProof: Codable {
 }
 
 public struct RunRecord: Codable, Identifiable {
-    public var schemaVersion = 1
+    public var schemaVersion = 2
     public var id: UUID
     public var kind: RunKind
     public var title: String
@@ -62,6 +65,7 @@ public struct RunRecord: Codable, Identifiable {
     public var exitCode: Int32?
     public var verifiedWorkerHeartbeat: Int?
     public var recorderPID: Int32?
+    public var agent: AgentEvidence?
 
     public init(id: UUID = UUID(), kind: RunKind = .rehearsal, title: String = "Closed-lid rehearsal",
                 seconds: Int, networkEnabled: Bool = false, startedAt: Date = Date()) {
@@ -74,6 +78,24 @@ public struct RunRecord: Codable, Identifiable {
         zip(observations, observations.dropFirst()).reduce(0) { count, pair in
             guard pair.0.lidClosed == true, pair.1.lidClosed == true,
                   let previous = pair.0.heartbeat, let next = pair.1.heartbeat else { return count }
+            return count + max(0, next - previous)
+        }
+    }
+
+    public var statusLabel: String {
+        switch status {
+        case .running: return "Recording"
+        case .completed: return "Recording finished"
+        case .cancelled: return "Recording stopped"
+        case .interrupted: return "Recording interrupted"
+        case .timedOut: return "Time limit reached"
+        }
+    }
+
+    public var closedLidAgentEvents: Int {
+        zip(observations, observations.dropFirst()).reduce(0) { count, pair in
+            guard pair.0.lidClosed == true, pair.1.lidClosed == true,
+                  let previous = pair.0.agentActivityCount, let next = pair.1.agentActivityCount else { return count }
             return count + max(0, next - previous)
         }
     }
@@ -92,6 +114,18 @@ public struct RunRecord: Codable, Identifiable {
             checks.append(Finding(title: "Expected result", state: status == .running ? .unverified : (proof ? .observed : .failed),
                 detail: proof ? "Worker exited zero and its run-specific final artifact contains the expected heartbeat count."
                     : "Requires a zero exit and a matching, complete worker artifact. Recording activity alone is insufficient."))
+        } else if kind == .codexSession {
+            let evidence = agent ?? AgentEvidence()
+            checks.append(Finding(title: "Agent activity", state: evidence.activityCount > 0 ? .observed : .unverified,
+                detail: "\(evidence.activityCount) new lifecycle events; \(evidence.toolCompletions) tool completions. These are logged events, not proof of useful progress or correctness."))
+            checks.append(Finding(title: "Events logged while closed", state: closedLidAgentEvents > 0 ? .observed : .unverified,
+                detail: "\(closedLidAgentEvents) lifecycle events were appended between closed-lid samples. Event delivery can be delayed. Intervals without events remain unknown; a slow model is not classified as stuck."))
+            let ended = evidence.state == .turnEnded && !evidence.streamIncomplete
+            checks.append(Finding(title: "Recorded turn outcome", state: ended ? .observed : evidence.state == .failed || evidence.state == .interrupted ? .failed : .unverified,
+                detail: evidence.streamIncomplete ? "The stream had unreadable or oversized records. Its final state cannot establish a complete lifecycle."
+                    : ended ? "Codex logged a turn end after attachment and no other logged turn remained active. This is not acceptance-test verification."
+                    : evidence.state == .unknown ? "No turn boundary has been observed since attachment. Tool events do not establish whether the agent is now working or waiting."
+                    : "Last logged state: \(evidence.state.rawValue). No approval state is inferred and no task-correctness claim is made."))
         } else {
             checks.append(Finding(title: "Command exit", state: exitCode == nil ? .unverified : (exitCode == 0 ? .observed : .failed),
                 detail: exitCode.map { "Observed foreground process exit \($0). This does not establish task correctness or child-process completion." }

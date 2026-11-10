@@ -15,8 +15,16 @@ November 10, 2026 · Apple Silicon · macOS 27.0.1 (26A434) · Swift 6.4
 
 Swift's default test-bundle signing failed inside this synced Documents folder because file-provider metadata was added to the generated bundle. Building/testing in a temporary scratch directory passed. App packaging signs and verifies in a temporary directory and creates a ZIP before copying into the synced output folder.
 
-## Physical and agent validation still required
+## Codex adapter validation
 
-No physical lid close, system sleep/wake, thermal limit, battery cutoff, live-agent progress adapter, or provider-connection continuity has been validated. The prototype does not implement sleep control or those cutoffs. An open-lid pass must not be used as closed-lid evidence.
+- 23 Swift tests pass after adding the adapter. New checks cover content filtering, real exec JSONL shapes, historical-event exclusion, multiple logged turns, partial lines, truncation/replacement, oversized records, stream incompleteness, privacy sentinels, and older recording compatibility.
+- Live CLI observation of this active Codex Desktop chat: seven new tool-completion events in a 90-second recording. The observation reached its timeout and left the agent running. No new turn-start or end event was observed, so the turn outcome remained unverified.
+- Native UI observation of the same live chat: four new tool completions. Stop recording ended observation while the chat continued; no agent process was terminated. The exported report is `live-codex-observation.md`.
+- Neither live check involved closing the lid. Their activity is real; their closed-lid results remain unverified.
+- The first GitHub macOS ARM job failed before execution because a runner was not acquired. Switching to `macos-15-intel` produced a successful hosted test and app-package build for the initial prototype. The adapter receives its own subsequent CI run.
+
+## Physical validation still required
+
+No physical lid close, system sleep/wake, thermal limit, battery cutoff, or provider-connection continuity has been validated. The prototype does not implement sleep control or those cutoffs. An open-lid pass must not be used as closed-lid evidence. Logged agent events do not independently establish task correctness or an approval-wait state.
 
 Record future physical tests with hardware, OS, power source, network, keep-awake configuration, duration, and the exported report. Retest after relevant configuration changes.

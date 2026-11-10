@@ -34,9 +34,10 @@ struct BorrowCLI {
             }
             return
         }
-        guard command == "rehearse" || command == "run" else { throw UsageError.invalid(help) }
+        guard ["rehearse", "run", "observe-codex"].contains(command) else { throw UsageError.invalid(help) }
         var seconds = command == "rehearse" ? 120 : 3600
         var network = false
+        var sessionURL: URL?
         var root = RecordingStore.defaultRoot
         var task: [String] = []
         var index = 1
@@ -44,6 +45,10 @@ struct BorrowCLI {
             switch arguments[index] {
             case "--": task = Array(arguments.dropFirst(index + 1)); index = arguments.count; continue
             case "--network": network = true
+            case "--session":
+                index += 1
+                guard index < arguments.count else { throw UsageError.invalid("--session needs a selected JSONL log") }
+                sessionURL = URL(fileURLWithPath: arguments[index])
             case "--duration", "--timeout":
                 index += 1
                 let maximum = command == "rehearse" ? 600 : 3600
@@ -60,9 +65,12 @@ struct BorrowCLI {
             index += 1
         }
         if command == "run" && task.isEmpty { throw UsageError.invalid("run requires -- /absolute/path/to/executable [args]") }
+        if command == "observe-codex", sessionURL == nil { throw UsageError.invalid("observe-codex requires --session /path/to/selected.jsonl") }
+        if command != "observe-codex", sessionURL != nil { throw UsageError.invalid("--session is only supported by observe-codex") }
+        if command != "run", !task.isEmpty { throw UsageError.invalid("Only run accepts an executable after --") }
         if let executable = task.first, !executable.hasPrefix("/") { throw UsageError.invalid("Use an absolute executable path") }
-        let record = RunRecord(kind: command == "run" ? .command : .rehearsal,
-            title: task.first.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "Closed-lid rehearsal",
+        let record = RunRecord(kind: command == "run" ? .command : command == "observe-codex" ? .codexSession : .rehearsal,
+            title: command == "observe-codex" ? "Codex session" : task.first.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "Closed-lid rehearsal",
             seconds: seconds, networkEnabled: network)
         let directory = root.appendingPathComponent(record.id.uuidString, isDirectory: true)
         let proof = directory.appendingPathComponent("worker.json")
@@ -74,26 +82,33 @@ struct BorrowCLI {
         }
         defer { signals.forEach { $0.cancel() } }
         print("Recording: \(directory.path)")
-        let result = try await recorder.run(
-            executable: URL(fileURLWithPath: task.first ?? CommandLine.arguments[0]).standardizedFileURL,
-            arguments: command == "run" ? Array(task.dropFirst()) : ["worker", record.id.uuidString, String(seconds), proof.path, "--internal"],
-            proofURL: command == "run" ? nil : proof)
+        let result: RunRecord
+        if let sessionURL { result = try await recorder.observeCodex(sessionURL: sessionURL) }
+        else {
+            result = try await recorder.run(
+                executable: URL(fileURLWithPath: task.first ?? CommandLine.arguments[0]).standardizedFileURL,
+                arguments: command == "run" ? Array(task.dropFirst()) : ["worker", record.id.uuidString, String(seconds), proof.path, "--internal"],
+                proofURL: command == "run" ? nil : proof)
+        }
         print("\(result.status.rawValue). Report: \(directory.appendingPathComponent("report.md").path)")
         if result.status == .cancelled { exit(130) }
         if result.status == .timedOut { exit(124) }
         if result.status == .interrupted { exit(1) }
+        if result.agent?.state == .failed || result.agent?.state == .interrupted { exit(1) }
         if let code = result.exitCode, code != 0 { exit(code > 0 && code < 126 ? code : 1) }
     }
 
     static let help = """
-    Borrow 0.1 — rehearse and record unattended local work
+    Borrow 0.2 — rehearse and record unattended local work
 
       borrow rehearse [--duration 120] [--network] [--output DIRECTORY]
       borrow run [--timeout 3600] [--network] [--output DIRECTORY] -- /absolute/executable [args]
+      borrow observe-codex --session /path/to/selected.jsonl [--timeout 3600] [--network] [--output DIRECTORY]
 
     --network contacts Apple's connectivity endpoint. It does not probe your model provider.
     Reports are local. Command arguments and output are not saved; foreground output passes through.
     No sleep settings are changed. Use your existing keep-awake setup for a closed-lid rehearsal.
     Cancellation/timeouts terminate only the owned foreground process, not descendants.
+    observe-codex is read-only: cancelling or timing out never terminates the observed agent.
     """
 }
