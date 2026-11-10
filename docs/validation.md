@@ -23,8 +23,12 @@ Swift's default test-bundle signing failed inside this synced Documents folder b
 - Neither live check involved closing the lid. Their activity is real; their closed-lid results remain unverified.
 - The first GitHub macOS ARM job failed before execution because a runner was not acquired. Switching to `macos-15-intel` produced a successful hosted test and app-package build for the initial prototype. The adapter receives its own subsequent CI run.
 
-## Physical validation still required
+## First physical lid-close validation
 
-No physical lid close, system sleep/wake, thermal limit, battery cutoff, or provider-connection continuity has been validated. The prototype does not implement sleep control or those cutoffs. An open-lid pass must not be used as closed-lid evidence. Logged agent events do not independently establish task correctness or an approval-wait state.
+The operator completed a real thirty-second rehearsal on charger with no external display. The worker advanced 15 ticks between closed-lid samples and produced the expected final artifact. macOS also posted before-sleep/wake notifications; the power log shows a 16-second DarkWake interval and an existing caffeinate hold. [Full notes and evidence](physical-lid-close.md) preserve the result and conditions. This exposed and corrected an overly aggressive failure classification for before-sleep notifications.
+
+## Further physical validation required
+
+Long-duration closed-lid behavior, battery-only behavior, actual execution suspension/resume, thermal limits, battery cutoffs, and provider-connection continuity remain unverified. The prototype does not implement sleep control or those cutoffs. Logged agent events do not independently establish task correctness or an approval-wait state.
 
 Record future physical tests with hardware, OS, power source, network, keep-awake configuration, duration, and the exported report. Retest after relevant configuration changes.

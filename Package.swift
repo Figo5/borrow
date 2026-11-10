@@ -13,7 +13,7 @@ let package = Package(
         .target(name: "BorrowCore"),
         .executableTarget(name: "BorrowCLI", dependencies: ["BorrowCore"]),
         .executableTarget(name: "BorrowApp", dependencies: ["BorrowCore"]),
-        .testTarget(name: "BorrowCoreTests", dependencies: ["BorrowCore"])
+        .testTarget(name: "BorrowCoreTests", dependencies: ["BorrowCore"], resources: [.copy("Fixtures")])
     ],
     swiftLanguageModes: [.v5]
 )

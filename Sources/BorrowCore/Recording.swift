@@ -103,6 +103,7 @@ public struct RunRecord: Codable, Identifiable {
     public var findings: [Finding] {
         let closed = observations.filter { $0.lidClosed == true }
         let sleeps = events.filter { $0.kind == "systemSleep" }.count
+        let wakes = events.filter { $0.kind == "systemWake" }.count
         let gaps = events.filter { $0.kind == "observationGap" }.count
         var checks: [Finding] = []
         if kind == .rehearsal {
@@ -133,10 +134,21 @@ public struct RunRecord: Codable, Identifiable {
             checks.append(Finding(title: "Agent progress", state: .unverified,
                 detail: "This recorder observes process exit and machine conditions. Agent-specific progress and approval adapters are not implemented."))
         }
-        checks.append(Finding(title: "Sleep and sampling", state: sleeps > 0 ? .failed : (gaps > 0 || closed.isEmpty ? .unverified : .observed),
-            detail: sleeps > 0 ? "macOS announced sleep \(sleeps) time(s) during this recording."
-                : gaps > 0 ? "\(gaps) observation gap(s). A gap may be sleep, scheduling delay, or a stalled recorder; its cause is unknown."
-                : closed.isEmpty ? "No closed-lid interval was sampled." : "No sleep notification or long sampling gap was recorded. This is bounded observation, not a guarantee."))
+        let powerDetail: String
+        if sleeps > 0 {
+            powerDetail = "macOS posted \(sleeps) before-sleep and \(wakes) wake notification(s). " +
+                (gaps > 0 ? "There were \(gaps) long sampling gap(s). " : "No long sampling gap was recorded. ") +
+                (closedLidHeartbeats > 0 ? "Worker progress was also sampled with the lid closed. " : "") +
+                "Notifications alone do not measure how long execution paused; uninterrupted operation remains unverified."
+        } else if gaps > 0 {
+            powerDetail = "\(gaps) observation gap(s). A gap may be sleep, scheduling delay, or a stalled recorder; its cause is unknown."
+        } else if closed.count < 2 {
+            powerDetail = "Insufficient closed-lid samples to assess this interval."
+        } else {
+            powerDetail = "No sleep notification or long sampling gap was recorded. This is bounded observation, not a guarantee."
+        }
+        checks.append(Finding(title: "Sleep and sampling",
+            state: sleeps > 0 || gaps > 0 || closed.count < 2 ? .unverified : .observed, detail: powerDetail))
         let network = (closed.isEmpty ? observations : closed).compactMap(\.networkReachable)
         checks.append(Finding(title: "Connectivity probe", state: !networkEnabled ? .skipped : network.isEmpty ? .unverified : network.contains(false) ? .failed : .observed,
             detail: !networkEnabled ? "Off. Enable the optional Apple connectivity check before starting."

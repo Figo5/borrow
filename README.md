@@ -54,11 +54,11 @@ The parser supports the local journal shapes observed in Codex Desktop on this d
 | Finding | What it means |
 | --- | --- |
 | Observed | The recording contains the specific evidence described beside the finding. |
-| Failed | The bounded check encountered a failure, such as a nonzero command exit or a system sleep notification. |
+| Failed | The bounded check encountered a failure, such as a nonzero command exit or a failed connectivity probe. |
 | Unverified | Evidence is missing, insufficient, or ambiguous. |
 | Skipped | The check was disabled or this prototype does not perform it. |
 
-A delayed sample is an **observation gap**, not a sleep diagnosis. macOS sleep notifications are a separate signal. A recorded closed-lid interval does not prove uninterrupted operation across every instant or predict future compatibility. The rehearsal checks a disposable worker, not your agent's model connection or the quality of its work.
+A delayed sample is an **observation gap**, not a sleep diagnosis. macOS before-sleep and wake notifications are separate signals; a before-sleep notification does not measure an execution pause. If power notifications and closed-lid worker progress coexist, the report preserves both facts and leaves uninterrupted operation unverified. A recorded closed-lid interval does not predict future compatibility. The rehearsal checks a disposable worker, not your agent's model connection or the quality of its work.
 
 ## Local data
 

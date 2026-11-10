@@ -99,7 +99,7 @@ struct BorrowCLI {
     }
 
     static let help = """
-    Borrow 0.2 — rehearse and record unattended local work
+    Borrow 0.2.1 — rehearse and record unattended local work
 
       borrow rehearse [--duration 120] [--network] [--output DIRECTORY]
       borrow run [--timeout 3600] [--network] [--output DIRECTORY] -- /absolute/executable [args]

@@ -41,8 +41,8 @@ public final class Recorder {
             child?.standardOutput = FileHandle.nullDevice; child?.standardError = FileHandle.nullDevice
         }
         for (name, kind, detail) in [
-            (NSWorkspace.willSleepNotification, "systemSleep", "macOS announced system sleep."),
-            (NSWorkspace.didWakeNotification, "systemWake", "macOS announced system wake."),
+            (NSWorkspace.willSleepNotification, "systemSleep", "macOS posted a before-sleep notification; this does not measure an execution pause."),
+            (NSWorkspace.didWakeNotification, "systemWake", "macOS posted a wake notification."),
             (NSWorkspace.screensDidSleepNotification, "displaySleep", "Displays slept; this does not establish system sleep."),
             (NSWorkspace.screensDidWakeNotification, "displayWake", "Displays woke.")
         ] {

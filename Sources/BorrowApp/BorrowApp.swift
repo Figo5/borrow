@@ -161,7 +161,7 @@ struct BorrowWindow: View {
                         }.padding(.vertical, 5).tag(run.id)
                     }
                 }.listStyle(.sidebar)
-                Text("Local prototype · 0.2\nNo sleep settings changed.")
+                Text("Local prototype · 0.2.1\nNo sleep settings changed.")
                     .font(.caption).foregroundStyle(.secondary).padding(12)
             }
             .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 300)

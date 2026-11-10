@@ -1,0 +1,322 @@
+{
+  "endedAt" : "2026-11-10T16:27:58Z",
+  "events" : [
+    {
+      "detail" : "Recorder started. No sleep overrides or wake assertions requested.",
+      "id" : "14870DA2-54B1-4C2C-8155-ACA4A0C8132B",
+      "kind" : "started",
+      "time" : "2026-11-10T16:27:26Z"
+    },
+    {
+      "detail" : "Started owned foreground process 79429.",
+      "id" : "AAC356A7-CA3D-4308-8391-5720A4CDED03",
+      "kind" : "taskStarted",
+      "time" : "2026-11-10T16:27:26Z"
+    },
+    {
+      "detail" : "Lid sampled open.",
+      "id" : "492FBADA-2C8B-4C74-B418-16EC654741F3",
+      "kind" : "lid",
+      "time" : "2026-11-10T16:27:26Z"
+    },
+    {
+      "detail" : "macOS announced system sleep.",
+      "id" : "C6F83C67-E22C-4ECF-A3F6-C97B7A62D49C",
+      "kind" : "systemSleep",
+      "time" : "2026-11-10T16:27:30Z"
+    },
+    {
+      "detail" : "Lid sampled closed.",
+      "id" : "685E9E20-AF6D-4A0A-81CA-33918F7169D3",
+      "kind" : "lid",
+      "time" : "2026-11-10T16:27:30Z"
+    },
+    {
+      "detail" : "macOS announced system wake.",
+      "id" : "0A8F0F6A-6146-4D1D-A873-B4230C1B19A6",
+      "kind" : "systemWake",
+      "time" : "2026-11-10T16:27:46Z"
+    },
+    {
+      "detail" : "Lid sampled open.",
+      "id" : "BCCD82C9-5285-4434-AA4F-848E42052CCC",
+      "kind" : "lid",
+      "time" : "2026-11-10T16:27:47Z"
+    },
+    {
+      "detail" : "Foreground process exited 0.",
+      "id" : "1455877A-3F7A-4F91-81AB-EB06BB54A375",
+      "kind" : "taskExited",
+      "time" : "2026-11-10T16:27:58Z"
+    }
+  ],
+  "exitCode" : 0,
+  "id" : "F4879A7C-AEBF-4C58-8F13-943956BAD767",
+  "kind" : "rehearsal",
+  "macOS" : "Version 27.0.1 (Build 26A434)",
+  "networkEnabled" : false,
+  "observations" : [
+    {
+      "batteryPercent" : 100,
+      "id" : "9D6E0391-02F9-416A-9F4B-F8B63DBC8C88",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:26Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 0,
+      "id" : "2E3C3586-F02F-4FA2-8B4E-B5A0A2BF8A4A",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:27Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 1,
+      "id" : "BBF3AA52-9FD8-4B29-9B9F-0E2167B013A1",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:28Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 2,
+      "id" : "CECFED90-09E6-49EF-839F-573F32F5BF8F",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:29Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 3,
+      "id" : "1B6D1CCB-E980-4F25-96FB-27DA7B1E3DB6",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:30Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 4,
+      "id" : "53816EA6-4C1E-42BB-97CF-97A52A8AD833",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:31Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 5,
+      "id" : "2080FFCD-3647-4A15-AA65-AD203833F6FD",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:32Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 6,
+      "id" : "FAA62A3A-B9A4-4FE8-9C52-7B0BA287787A",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:33Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 7,
+      "id" : "FA9F56DB-ED3D-46B6-9B7D-4FD855696501",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:34Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 8,
+      "id" : "A955F24A-6E59-4E14-8F14-DD4E6E9283F6",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:35Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 9,
+      "id" : "92177779-77B8-4B65-899A-E4D3CA9371B0",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:37Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 10,
+      "id" : "F1B95DAC-7DBD-4D23-A4AD-97A4D806F91F",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:38Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 11,
+      "id" : "CCFC7CAC-7E6F-42D9-B712-FCD5BC3ECE35",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:39Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 12,
+      "id" : "C04C8E5E-8CB7-4CF5-A987-3999CA8598DC",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:40Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 13,
+      "id" : "B5676946-E604-492A-9388-CB8D660C6201",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:41Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 14,
+      "id" : "7DFF8B7A-314E-496C-87CA-8199189B6E08",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:42Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 15,
+      "id" : "A765529C-C65D-4217-8649-3935D08FB3C6",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:43Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 16,
+      "id" : "877EF952-8503-44CA-A409-019D707409E6",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:44Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 17,
+      "id" : "FE1B25C0-433D-4AE0-871D-33CAF018752E",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:45Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 18,
+      "id" : "AE35EDAA-E4C3-499E-84BB-A448AE87F310",
+      "lidClosed" : true,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:46Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 19,
+      "id" : "83D942AE-633E-49F1-BEEC-5A34D32242CD",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:47Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 20,
+      "id" : "3C27C281-CC78-4E70-90AE-A642628373D7",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:48Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 21,
+      "id" : "F669E9DE-34FC-425F-A19A-EAA20E5D4527",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:49Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 22,
+      "id" : "BE0BC0AD-FED2-4FA3-B573-18A78A42A069",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:50Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 23,
+      "id" : "981DE2A2-23C2-4A1B-B389-493FF32379B7",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:51Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 24,
+      "id" : "CF8A9BC2-45D1-4B92-8F09-3CB001B34E75",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:52Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 25,
+      "id" : "587BBB23-AAFB-4C63-A519-7AA317161849",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:53Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 26,
+      "id" : "52718CF6-75EF-416B-A344-D045F9210F94",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:54Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 27,
+      "id" : "2F3187C0-251B-4C48-B9EB-E786F0973AB4",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:55Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 28,
+      "id" : "90BC80A6-F362-4856-936A-4BF2FE28F131",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:56Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 29,
+      "id" : "10E86D56-6A4B-40B8-B747-0620D1072760",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:57Z"
+    },
+    {
+      "batteryPercent" : 100,
+      "heartbeat" : 30,
+      "id" : "F983C6EC-F42C-414D-82B7-FB56F592F265",
+      "lidClosed" : false,
+      "thermalState" : "nominal",
+      "time" : "2026-11-10T16:27:58Z"
+    }
+  ],
+  "plannedSeconds" : 30,
+  "recorderPID" : 79428,
+  "schemaVersion" : 2,
+  "startedAt" : "2026-11-10T16:27:26Z",
+  "status" : "completed",
+  "title" : "Closed-lid rehearsal",
+  "verifiedWorkerHeartbeat" : 30
+}
