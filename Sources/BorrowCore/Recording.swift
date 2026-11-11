@@ -13,12 +13,14 @@ public struct MachineSample: Codable, Identifiable {
     public var thermalState: String
     public var batteryPercent: Int?
     public var agentActivityCount: Int?
+    public var onACPower: Bool?
     public init(time: Date, lidClosed: Bool?, heartbeat: Int? = nil,
                 networkReachable: Bool? = nil, thermalState: String = "unknown", batteryPercent: Int? = nil,
-                agentActivityCount: Int? = nil) {
+                agentActivityCount: Int? = nil, onACPower: Bool? = nil) {
         self.time = time; self.lidClosed = lidClosed; self.heartbeat = heartbeat
         self.networkReachable = networkReachable; self.thermalState = thermalState; self.batteryPercent = batteryPercent
         self.agentActivityCount = agentActivityCount
+        self.onACPower = onACPower
     }
 }
 
@@ -50,7 +52,7 @@ public struct WorkerProof: Codable {
 }
 
 public struct RunRecord: Codable, Identifiable {
-    public var schemaVersion = 2
+    public var schemaVersion = 3
     public var id: UUID
     public var kind: RunKind
     public var title: String
@@ -66,12 +68,16 @@ public struct RunRecord: Codable, Identifiable {
     public var verifiedWorkerHeartbeat: Int?
     public var recorderPID: Int32?
     public var agent: AgentEvidence?
+    public var power: PowerEvidence?
 
     public init(id: UUID = UUID(), kind: RunKind = .rehearsal, title: String = "Closed-lid rehearsal",
-                seconds: Int, networkEnabled: Bool = false, startedAt: Date = Date()) {
+                seconds: Int, networkEnabled: Bool = false, wakeMode: WakeMode = .off, startedAt: Date = Date()) {
         self.id = id; self.kind = kind; self.title = title; self.startedAt = startedAt
         self.status = .running; self.macOS = ProcessInfo.processInfo.operatingSystemVersionString
         self.plannedSeconds = seconds; self.networkEnabled = networkEnabled
+        if wakeMode != .off {
+            power = PowerEvidence(mode: wakeMode, deadline: startedAt.addingTimeInterval(TimeInterval(seconds + (kind == .rehearsal ? 15 : 0))))
+        }
     }
 
     public var closedLidHeartbeats: Int {
@@ -100,12 +106,36 @@ public struct RunRecord: Codable, Identifiable {
         }
     }
 
-    public var findings: [Finding] {
+    /// A snapshot that still says "running" but is past its time limit, or has no sample for more than 10 seconds.
+    /// Its contents are history; nothing about the present (sleep, completion, protection) follows from it.
+    public func isStale(at now: Date) -> Bool {
+        guard status == .running else { return false }
+        let deadline = startedAt.addingTimeInterval(TimeInterval(plannedSeconds + (kind == .rehearsal ? 15 : 0)))
+        return now >= deadline || now.timeIntervalSince(observations.last?.time ?? startedAt) > 10
+    }
+
+    /// Compatibility accessor; evaluates freshness against the current clock.
+    public var findings: [Finding] { findings(at: Date()) }
+
+    public func findings(at now: Date) -> [Finding] {
+        let stale = isStale(at: now)
         let closed = observations.filter { $0.lidClosed == true }
         let sleeps = events.filter { $0.kind == "systemSleep" }.count
         let wakes = events.filter { $0.kind == "systemWake" }.count
         let gaps = events.filter { $0.kind == "observationGap" }.count
         var checks: [Finding] = []
+        if stale {
+            let deadline = startedAt.addingTimeInterval(TimeInterval(plannedSeconds + (kind == .rehearsal ? 15 : 0)))
+            let quiet = Int(now.timeIntervalSince(observations.last?.time ?? startedAt))
+            var reasons: [String] = []
+            if now >= deadline { reasons.append("its time limit has passed") }
+            if quiet > 10 { reasons.append(observations.isEmpty ? "it has no sample \(quiet) seconds after it started" : "its last sample is \(quiet) seconds old") }
+            checks.append(Finding(title: "Snapshot freshness", state: .unverified,
+                detail: "This snapshot still says the recording is running, but \(reasons.joined(separator: " and ")). " +
+                    "The recorder may have stopped, been suspended, or been unable to write; the cause is unknown. " +
+                    "Everything below is the last recorded history, not current state or current protection. " +
+                    "No sleep, wake, exit, or task completion is inferred from it."))
+        }
         if kind == .rehearsal {
             checks.append(Finding(title: "Work while closed", state: closedLidHeartbeats >= 3 ? .observed : .unverified,
                 detail: closedLidHeartbeats >= 3
@@ -130,7 +160,10 @@ public struct RunRecord: Codable, Identifiable {
         } else {
             checks.append(Finding(title: "Command exit", state: exitCode == nil ? .unverified : (exitCode == 0 ? .observed : .failed),
                 detail: exitCode.map { "Observed foreground process exit \($0). This does not establish task correctness or child-process completion." }
-                    ?? "Waiting for the foreground command to exit. No semantic completion claim is made."))
+                    ?? (status == .timedOut ? "No exit was observed before the time limit. A later exit is not counted as timely completion."
+                        : stale ? "No exit was recorded in this stale snapshot. Whether the command is still running is unknown."
+                        : status == .running ? "Waiting for the foreground command to exit. No semantic completion claim is made."
+                        : "No foreground command exit was observed in this recording.")))
             checks.append(Finding(title: "Agent progress", state: .unverified,
                 detail: "This recorder observes process exit and machine conditions. Agent-specific progress and approval adapters are not implemented."))
         }
@@ -154,8 +187,31 @@ public struct RunRecord: Codable, Identifiable {
             detail: !networkEnabled ? "Off. Enable the optional Apple connectivity check before starting."
                 : network.contains(false) ? "The Apple connectivity endpoint failed at least once. Provider/API health is not determined."
                 : "Apple's connectivity endpoint answered during \(network.count) sample(s). This does not test the agent's live connection, VPN, or remote-control bridge."))
-        checks.append(Finding(title: "Sleep settings restored", state: .skipped,
-            detail: "Borrow made no sleep-setting changes and holds no wake assertion. Restoration and actual post-task sleep are not tested in this prototype."))
+        if let power {
+            checks.append(Finding(title: "Borrow wake hold", state: power.acquiredAt != nil ? .observed : power.issue == .acquisitionFailed || power.state == .failed ? .failed : .unverified,
+                detail: power.acquiredAt != nil
+                    ? "Borrow confirmed its own \(power.mode.title.lowercased()) assertion. This does not establish uninterrupted execution or closed-lid compatibility. Last recorded state: \(power.state.rawValue)."
+                        + (stale ? " This snapshot is stale, so that state is history, not current protection." : "")
+                    : "Requested \(power.mode.title.lowercased()); no active Borrow-owned assertion was confirmed."))
+            let nothingHeld = power.cleanup == .nothingHeld
+            checks.append(Finding(title: "Borrow wake hold released",
+                state: nothingHeld ? .skipped : power.state == .released ? .observed : power.state == .failed ? .failed : .unverified,
+                detail: nothingHeld
+                    ? "No Borrow-owned hold was created, so there was nothing to release. No global sleep settings were changed."
+                    : power.state == .released
+                    ? "Borrow confirmed release of its own hold. Reason: \(power.releaseReason?.rawValue ?? "unknown"). No global sleep settings were changed."
+                    : "Borrow has not confirmed release in this recording. Its finite hold deadline is \(power.deadline.formatted()). Issue: \(power.issue?.rawValue ?? "none")."))
+            checks.append(Finding(title: "Actual post-task sleep", state: .unverified,
+                detail: "Releasing Borrow's hold only permits sleep. Other assertions, user activity and macOS policy may keep the Mac awake. Actual sleep was not established."))
+        } else {
+            checks.append(Finding(title: "Sleep settings restored", state: .skipped,
+                detail: "Borrow made no sleep-setting changes and requested no wake hold. Actual post-task sleep is not tested by this recording."))
+        }
+        let acSamples = observations.compactMap(\.onACPower)
+        if !acSamples.isEmpty {
+            checks.append(Finding(title: "Power source samples", state: .observed,
+                detail: "\(acSamples.filter { $0 }.count) AC, \(acSamples.filter { !$0 }.count) battery, and \(observations.count - acSamples.count) unknown sample(s). These describe sampled conditions only."))
+        }
         return checks
     }
 }
@@ -180,11 +236,12 @@ public enum RecordingStore {
     public static func read(from directory: URL) throws -> RunRecord {
         try decoder().decode(RunRecord.self, from: Data(contentsOf: directory.appendingPathComponent("recording.json")))
     }
-    public static func markdown(_ record: RunRecord) -> String {
-        var lines = ["# Borrow recording", "", "\(record.title)", "", "Status: \(record.status.rawValue)",
+    public static func markdown(_ record: RunRecord, now: Date = Date()) -> String {
+        var lines = ["# Borrow recording", "", "\(record.title)", "",
+                     "Status: \(record.status.rawValue)" + (record.isStale(at: now) ? " (stale snapshot — last recorded status, not current)" : ""),
                      "Started: \(record.startedAt.formatted())", "System: \(record.macOS)",
                      "Run: \(record.id.uuidString)", "", "## Observations", ""]
-        for finding in record.findings {
+        for finding in record.findings(at: now) {
             lines += ["### \(finding.title) — \(finding.state.rawValue)", "", finding.detail, ""]
         }
         lines += ["## Timeline", ""]

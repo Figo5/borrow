@@ -4,6 +4,14 @@ import IOKit
 import IOKit.ps
 
 public enum MachineProbe {
+    public static func onACPower() -> Bool? {
+        guard let info = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let source = IOPSGetProvidingPowerSourceType(info)?.takeUnretainedValue() as String? else { return nil }
+        if source == kIOPSACPowerValue { return true }
+        if source == kIOPSBatteryPowerValue { return false }
+        return nil
+    }
+
     public static func lidClosed() -> Bool? {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
         guard service != 0 else { return nil }

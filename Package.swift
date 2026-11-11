@@ -10,7 +10,7 @@ let package = Package(
         .executable(name: "BorrowApp", targets: ["BorrowApp"])
     ],
     targets: [
-        .target(name: "BorrowCore"),
+        .target(name: "BorrowCore", resources: [.copy("Resources/VERSION")]),
         .executableTarget(name: "BorrowCLI", dependencies: ["BorrowCore"]),
         .executableTarget(name: "BorrowApp", dependencies: ["BorrowCore"]),
         .testTarget(name: "BorrowCoreTests", dependencies: ["BorrowCore"], resources: [.copy("Fixtures")])

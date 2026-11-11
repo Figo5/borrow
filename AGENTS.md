@@ -4,7 +4,7 @@ Borrow is a native macOS Swift application and local task recorder. Build with `
 
 Keep findings bounded by evidence. A live process, quiet CPU, successful connectivity probe, or zero command exit must never become an invented claim that an agent's task is correct. Unknown is a valid result. Never label a sampling gap as sleep without a separate sleep signal. Fixture-based tests must not be presented as physical closed-lid validation.
 
-The prototype changes only its own recording files and launches explicitly requested foreground commands. It must not change global power settings, agent permissions/configuration, system services, or terminate unrelated processes. Connectivity probes are opt-in. Do not persist prompts, command arguments, output, environment contents, or screenshots in reports.
+The prototype changes its own recording files, launches explicitly requested foreground commands, and may create an explicitly requested, bounded recorder-owned wake hold. Wake modes default to off. The supported idle hold does not prevent lid-close sleep; the AC-only system hold is experimental. Confirm Borrow's actual assertion before reporting it active, and release only Borrow's own hold on every stop/error path. Assertion release allows normal sleep; it does not establish actual sleep. It must not change global power settings, agent permissions/configuration, system services, or terminate unrelated processes. Connectivity probes are opt-in. Do not persist prompts, command arguments, output, environment contents, or screenshots in reports.
 
 Use `@Observable` state and native SwiftUI/AppKit components. Keep app state on the main actor and core evidence rules independent of views. No external dependencies are currently needed.
 

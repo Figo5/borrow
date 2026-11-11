@@ -27,3 +27,17 @@ jobs:
         run: swift test
       - name: Build the native app package
         run: bash scripts/build-app.sh
+      - name: Verify the extracted native package
+        run: bash scripts/verify-package.sh
+      - name: Upload preview package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Borrow-preview-macOS-x86_64
+          path: |
+            dist/Borrow-*-macOS-x86_64.zip
+            dist/Borrow.zip
+            dist/SHA256SUMS
+            dist/BUILD-INFO.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

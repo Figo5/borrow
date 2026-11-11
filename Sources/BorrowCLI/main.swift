@@ -12,7 +12,13 @@ struct BorrowCLI {
     @MainActor static func main() async {
         do { try await execute(Array(CommandLine.arguments.dropFirst())) }
         catch {
-            FileHandle.standardError.write(Data("borrow: \(error.localizedDescription)\n".utf8))
+            let message: String
+            switch error {
+            case let error as UsageError: message = error.errorDescription ?? "Invalid recorder options. Use --help."
+            case let error as RecorderError: message = error.errorDescription ?? "Recording could not finish."
+            default: message = "Recording could not finish. Check the selected paths and file permissions."
+            }
+            FileHandle.standardError.write(Data("borrow: \(message)\n".utf8))
             exit(1)
         }
     }
@@ -20,6 +26,7 @@ struct BorrowCLI {
     @MainActor static func execute(_ arguments: [String]) async throws {
         guard let command = arguments.first else { print(help); return }
         if command == "--help" || command == "help" { print(help); return }
+        if command == "--version" { print(BorrowVersion.current); return }
         if command == "worker" {
             signal(SIGTERM, SIG_DFL); signal(SIGINT, SIG_DFL)
             guard arguments.count == 5, let id = UUID(uuidString: arguments[1]), let seconds = Int(arguments[2]), (1...86400).contains(seconds) else {
@@ -37,6 +44,7 @@ struct BorrowCLI {
         guard ["rehearse", "run", "observe-codex"].contains(command) else { throw UsageError.invalid(help) }
         var seconds = command == "rehearse" ? 120 : 3600
         var network = false
+        var wakeMode = WakeMode.off
         var sessionURL: URL?
         var root = RecordingStore.defaultRoot
         var task: [String] = []
@@ -45,6 +53,12 @@ struct BorrowCLI {
             switch arguments[index] {
             case "--": task = Array(arguments.dropFirst(index + 1)); index = arguments.count; continue
             case "--network": network = true
+            case "--wake":
+                index += 1
+                guard index < arguments.count, let mode = WakeMode(rawValue: arguments[index]) else {
+                    throw UsageError.invalid("--wake must be off, idle, or experimental-ac")
+                }
+                wakeMode = mode
             case "--session":
                 index += 1
                 guard index < arguments.count else { throw UsageError.invalid("--session needs a selected JSONL log") }
@@ -60,7 +74,7 @@ struct BorrowCLI {
                 index += 1
                 guard index < arguments.count else { throw UsageError.invalid("--output needs a directory") }
                 root = URL(fileURLWithPath: arguments[index], isDirectory: true)
-            default: throw UsageError.invalid("Unknown option \(arguments[index])")
+            default: throw UsageError.invalid("Unknown option. Use --help for supported options; put command arguments after --.")
             }
             index += 1
         }
@@ -71,15 +85,16 @@ struct BorrowCLI {
         if let executable = task.first, !executable.hasPrefix("/") { throw UsageError.invalid("Use an absolute executable path") }
         let record = RunRecord(kind: command == "run" ? .command : command == "observe-codex" ? .codexSession : .rehearsal,
             title: command == "observe-codex" ? "Codex session" : task.first.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "Closed-lid rehearsal",
-            seconds: seconds, networkEnabled: network)
+            seconds: seconds, networkEnabled: network, wakeMode: wakeMode)
         let directory = root.appendingPathComponent(record.id.uuidString, isDirectory: true)
         let proof = directory.appendingPathComponent("worker.json")
         let recorder = Recorder(record: record, directory: directory)
-        signal(SIGTERM, SIG_IGN); signal(SIGINT, SIG_IGN)
         let signals = [SIGTERM, SIGINT].map { number -> DispatchSourceSignal in
             let source = DispatchSource.makeSignalSource(signal: number, queue: .main)
             source.setEventHandler { recorder.cancelled = true }; source.resume(); return source
         }
+        // Before activation a signal may terminate this process, but no hold or task exists yet.
+        signal(SIGTERM, SIG_IGN); signal(SIGINT, SIG_IGN)
         defer { signals.forEach { $0.cancel() } }
         print("Recording: \(directory.path)")
         let result: RunRecord
@@ -96,18 +111,23 @@ struct BorrowCLI {
         if result.status == .interrupted { exit(1) }
         if result.agent?.state == .failed || result.agent?.state == .interrupted { exit(1) }
         if let code = result.exitCode, code != 0 { exit(code > 0 && code < 126 ? code : 1) }
+        if result.power?.issue == .releaseUnconfirmed { exit(1) }
     }
 
     static let help = """
-    Borrow 0.2.1 — rehearse and record unattended local work
+    Borrow \(BorrowVersion.current) — bounded wake holds and local task evidence
 
-      borrow rehearse [--duration 120] [--network] [--output DIRECTORY]
-      borrow run [--timeout 3600] [--network] [--output DIRECTORY] -- /absolute/executable [args]
-      borrow observe-codex --session /path/to/selected.jsonl [--timeout 3600] [--network] [--output DIRECTORY]
+      borrow rehearse [--duration 120] [--wake MODE] [--network] [--output DIRECTORY]
+      borrow run [--timeout 3600] [--wake MODE] [--network] [--output DIRECTORY] -- /absolute/executable [args]
+      borrow observe-codex --session /path/to/selected.jsonl [--timeout 3600] [--wake MODE] [--network] [--output DIRECTORY]
 
+    --wake off (default): observe without a wake hold.
+    --wake idle: prevent idle system sleep; lid-close sleep is still possible.
+    --wake experimental-ac: experimental AC-only hold; closed-lid compatibility requires testing.
+    Borrow releases only its own hold when recording ends. Release permits normal sleep; it does not force sleep.
     --network contacts Apple's connectivity endpoint. It does not probe your model provider.
     Reports are local. Command arguments and output are not saved; foreground output passes through.
-    No sleep settings are changed. Use your existing keep-awake setup for a closed-lid rehearsal.
+    No global sleep settings are changed. Other applications' wake holds are left alone.
     Cancellation/timeouts terminate only the owned foreground process, not descendants.
     observe-codex is read-only: cancelling or timing out never terminates the observed agent.
     """

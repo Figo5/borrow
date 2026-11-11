@@ -78,6 +78,7 @@ public struct CodexBatch {
     public var signals: [AgentSignal]
     public var skippedLines: Int
     public var activeTurns: Int
+    public var pendingRecord: Bool
 }
 
 /// Follows one explicitly selected file from its current end; never scans unrelated sessions.
@@ -87,11 +88,13 @@ public final class CodexLogReader {
     private let inode: UInt64
     private var pending = Data()
     private var discardingLine = false
+    private var pendingHistorical = false
     private var offset: UInt64 = 0
     private var activeTurns: Set<String> = []
     private var anonymousTurn = false
     private let maximumLineBytes = 1_048_576
     public private(set) var historyIncomplete = false
+    public var pendingRecord: Bool { !pending.isEmpty || discardingLine }
 
     public init(url: URL) throws {
         self.url = url
@@ -124,20 +127,21 @@ public final class CodexLogReader {
                     else if !pending.isEmpty {
                         if let signal = CodexEventParser.parse(pending) {
                             updateTurns(signal)
-                            if collect { signals.append(signal) }
+                            if collect && !pendingHistorical { signals.append(signal) }
                         } else if (try? JSONSerialization.jsonObject(with: pending)) == nil { skipped += 1 }
                     }
-                    pending.removeAll(keepingCapacity: true); discardingLine = false
+                    pending.removeAll(keepingCapacity: true); discardingLine = false; pendingHistorical = false
                 } else if !discardingLine {
                     if pending.count < maximumLineBytes { pending.append(byte) }
                     else { pending.removeAll(keepingCapacity: true); discardingLine = true }
                 }
             }
         }
-        // A line that began before attachment is historical, even if it completes afterward.
-        if !collect, !pending.isEmpty { pending.removeAll(keepingCapacity: true); discardingLine = true }
+        // Finish parsing a historical tail for bookkeeping, but never count it as fresh activity.
+        if !collect, pendingRecord { pendingHistorical = true }
         if skipped > 0 { activeTurns.removeAll(); anonymousTurn = false }
-        return CodexBatch(signals: signals, skippedLines: skipped, activeTurns: activeTurns.count + (anonymousTurn ? 1 : 0))
+        return CodexBatch(signals: signals, skippedLines: skipped,
+                          activeTurns: activeTurns.count + (anonymousTurn ? 1 : 0), pendingRecord: pendingRecord)
     }
 
     private func updateTurns(_ signal: AgentSignal) {

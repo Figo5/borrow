@@ -72,6 +72,66 @@ private func append(_ data: Data, to url: URL) throws {
     #expect(try reader.poll().signals.count == 1)
 }
 
+@Test func attachingMidLinePreservesHistoricalBookkeepingWithoutCountingItAsMalformed() throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let file = root.appendingPathComponent("selected.jsonl")
+    try Data(journal("task_started", turn: "historical").dropLast()).write(to: file)
+    let reader = try CodexLogReader(url: file)
+    try append(Data([10]) + journal("item_completed", extra: ["item": ["type": "McpToolCall"]]), to: file)
+    let batch = try reader.poll()
+    #expect(batch.skippedLines == 0)
+    #expect(batch.activeTurns == 1)
+    #expect(batch.signals.map(\.kind) == [.toolCompleted])
+    try append(journal("task_complete", turn: "historical"), to: file)
+    #expect(try reader.poll().activeTurns == 0)
+}
+
+@Test func turnEndWithAnUnfinishedFollowingRecordKeepsTheBoundaryPending() throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let file = root.appendingPathComponent("selected.jsonl")
+    try Data().write(to: file)
+    let reader = try CodexLogReader(url: file)
+    let next = try journal("task_started", turn: "next")
+    try append(journal("task_complete") + Data(next.dropLast()), to: file)
+    let boundary = try reader.poll()
+    #expect(boundary.signals.map(\.kind) == [.turnEnded])
+    #expect(boundary.pendingRecord)
+    try append(Data([10]), to: file)
+    let continued = try reader.poll()
+    #expect(continued.signals.map(\.kind) == [.turnStarted])
+    #expect(continued.activeTurns == 1)
+    #expect(!continued.pendingRecord)
+}
+
+@MainActor @Test(arguments: [true, false])
+func recorderWaitsForPendingBytesAfterAnObservedTurnEnd(nextTurn: Bool) async throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let file = root.appendingPathComponent("selected.jsonl")
+    try journal("task_started").write(to: file)
+    let writer = Task { @MainActor in
+        try await Task.sleep(for: .milliseconds(150))
+        let following = nextTurn ? try journal("task_started", turn: "next")
+            : Data("{\"type\":\"session_meta\",\"payload\":{}}\n".utf8)
+        try append(journal("task_complete") + Data(following.dropLast()), to: file)
+        try await Task.sleep(for: .milliseconds(1500))
+        try append(Data([10]), to: file)
+        if nextTurn { try append(journal("task_complete", turn: "next"), to: file) }
+    }
+    defer { writer.cancel() }
+    let recorder = Recorder(record: RunRecord(kind: .codexSession, seconds: 6), directory: root.appendingPathComponent("out"))
+    let run = try await recorder.observeCodex(sessionURL: file)
+    #expect(run.status == .completed)
+    #expect(run.agent?.activityCount == (nextTurn ? 3 : 1))
+    #expect(run.agent?.streamIncomplete == false)
+    #expect(run.observations.count >= 3)
+}
+
 @Test func truncatedOrReplacedSourceIsNotSilentlyReplayed() throws {
     let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
