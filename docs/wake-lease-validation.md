@@ -96,6 +96,12 @@ A copied source archive nested inside another Git repository built successfully 
 
 The final archive is under `dist/preview-2026-11-11/`. It was built separately because native UI control was unreliable; no fresh corrected-build UI pass or video is claimed. The user deferred the physical trial on November 11. Release of a hold still does not establish actual system sleep.
 
+### Hosted packaging follow-up
+
+The first hosted run after the approved push passed tests and compilation, but extracted-helper verification exposed a SwiftPM resource-search difference: that toolchain searched beside the helper or in the deleted build directory instead of the app's `Contents/Resources`. The version loader now resolves packaged app/helper resources explicitly, while source builds retain SwiftPM resource lookup. A missing packaged resource returns a detectable development version rather than evaluating a fatal generated accessor.
+
+Three added regression tests cover app and helper paths, both resource-bundle layouts, missing packaged resources, and source fallback. The follow-up local suite passed with 73 tests discovered: 70 ran and the three opt-in native tests were disabled. The earlier 70-test native-enabled run remains the power-lifecycle evidence; no power logic changed in this packaging fix. Hosted results for the follow-up are recorded on GitHub.
+
 ## Remaining evidence
 
 - A new five-to-ten-minute real-agent closed-lid comparison was deferred by the user on November 11. The previous short worker test was confounded by an existing `caffeinate` hold and is preserved in [its original notes](physical-lid-close.md).

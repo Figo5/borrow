@@ -22,6 +22,8 @@ The user deferred the physical trial, reviewed the software handoff, and approve
 - A source copy inside an enclosing Git checkout retained `source-archive` provenance and passed extracted signature, architecture, version-resource, and help checks.
 - Current code/test/build/workflow inputs match the archive's source manifest. The build is ad-hoc signed, not notarized.
 
+Hosted extraction subsequently caught a version-resource search-path difference. A focused loader fix and three regression tests were added; the follow-up suite discovered 73 tests, with 70 passing and three opt-in native tests skipped. Package verification was repeated after the fix. GitHub records the final hosted result; this fix does not alter the power-lifecycle behavior validated above.
+
 Full details and coverage are in [the validation record](wake-lease-validation.md). Default hosted tests leave native power tests disabled; hosted checks for these uncommitted changes have not run.
 
 ## Local delivery

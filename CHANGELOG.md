@@ -10,6 +10,7 @@ This entry describes the preview candidate. The release checklist, physical vali
 - Adds architecture-labelled packages, SHA-256 checksums, build metadata, installation/privacy documentation, and issue templates.
 - Corrects unknown/no-held cleanup evidence, stale exports, partial journal boundaries, and completion first observed after a deadline.
 - Clarifies app-instance ownership and first-run guidance; redacts invalid CLI inputs and verifies extracted CI packages.
+- Loads packaged version resources independently of SwiftPM's toolchain-specific generated search paths.
 
 The experimental mode is not a universal closed-lid guarantee. Releasing Borrow's hold permits normal sleep policy; it does not force or certify system sleep. Longer real-agent closed-lid validation and the end-to-end demonstration remain pending until their evidence is recorded.
 
