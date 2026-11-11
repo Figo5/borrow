@@ -1,90 +1,104 @@
 # Borrow
 
-**Rehearse a closed-lid task. See what actually happened.**
+**Borrow time for a task. Let go when the recording ends.**
 
-Borrow is a native Swift app and command recorder for investigating unattended work on a Mac. It records lid state, sleep/wake notifications, task activity and exit, and optional connectivity checks into a local, exportable report.
+Borrow is a native Swift macOS app that gives a local task a temporary wake hold and records what happened. Rehearse a lid-close setup, record a foreground command, or follow one selected Codex session. Keep the evidence in a local, exportable report.
 
-**Status: working prototype, not a keep-awake utility.** Borrow does not change power settings or prevent sleep. Use your existing keep-awake setup to test it. An experimental, read-only Codex adapter follows a session you select. This version does not detect agent approvals, restart agents, or establish that generated code is correct.
+**Development preview.** Supported idle-sleep prevention does not prevent lid-close sleep. The stronger AC-only mode is experimental and needs a real test on your Mac. Closed-lid compatibility, uninterrupted agent connections, and actual sleep after release are separate observations.
 
-## Try it
+## First run
 
-Requires macOS 14+ and the Swift 6 toolchain (Xcode or Command Line Tools). No package dependencies, account, or API key.
+Requires macOS 14+ and Swift 6 through Xcode or Command Line Tools. No external packages, Borrow account, or Borrow API key.
+
+Quit an already-running Borrow before rebuilding the app bundle.
 
 ```sh
-swift test
+swift test --scratch-path "$(mktemp -d)"
 bash scripts/build-app.sh
 open dist/Borrow.app
 ```
 
-In the app, choose a rehearsal length and press **Start rehearsal**. A separate worker writes one heartbeat per second and a run-specific final artifact. Close the lid on a ventilated desk, wait, and reopen to inspect the recording. First try an open-lid run so you know what the normal result looks like.
+1. Choose **30 seconds** and leave **Wake hold** off for your first open-lid rehearsal.
+2. Press **Start rehearsal**. A separate worker writes a heartbeat and a run-specific final artifact.
+3. Inspect the report. An open-lid run leaves closed-lid work **Unverified**.
+4. Choose a wake mode, repeat, and confirm the hold state before attempting a lid-close test. Reopen the lid to review the result.
 
-The app only credits worker progress between two samples that both observed the lid closed. A successful open-lid run leaves the closed-lid finding **Unverified**.
+The report credits worker progress only between two samples that both observed the lid closed. It preserves power notifications and sampling gaps separately. A successful short trial establishes only that setup and interval.
 
-The locally built app is ad-hoc signed. It is not Developer ID signed or notarized for public distribution.
+The local app is ad-hoc signed. A Developer ID signed, notarized download is not available yet. See [installation and removal](docs/installation.md) for the source-first preview and build details.
 
-If a synced folder adds Finder metadata that prevents Swift's test-bundle signing, use `swift test --scratch-path "$(mktemp -d)"`. The app build script already uses a temporary build directory to avoid that problem.
+## Choose a wake hold
+
+| Mode | Behavior |
+| --- | --- |
+| Off, the default | Record without requesting a wake hold. |
+| Prevent idle sleep | Use a supported temporary assertion. The display may sleep and closing the lid may still cause system sleep. |
+| Experimental AC hold | Use Apple's built-in `caffeinate` system hold, bound to Borrow's recorder and deadline. Requires confirmed AC power. Closed-lid behavior is experimental. |
+
+Borrow confirms its own assertion before reporting an active hold. It releases only its own hold when recording finishes, fails, is stopped, or reaches its deadline. Experimental AC mode ends if AC is lost or unknown. Other applications' holds remain untouched.
+
+**Release permits normal sleep.** It does not force sleep, reset your settings, establish that an agent's code is correct, or prove that the Mac actually slept. [The feasibility notes](docs/sleep-control-research.md) explain the supported API and experimental-mode limits.
+
+Closing the window keeps this app instance's bounded recorder running. **Quit Borrow** stops that recorder and waits for cleanup. A recorder started from a terminal or a previous app instance is view-only here and keeps its own deadline; the app leaves it untouched. **Stop recording** ends this window's observation while leaving an externally observed Codex agent running.
 
 ## Record a command
 
 ```sh
 swift build
-.build/debug/borrow rehearse --duration 30
-.build/debug/borrow run --timeout 600 -- /usr/bin/make test
-.build/debug/borrow observe-codex --session /path/to/selected-session.jsonl --timeout 300
+.build/debug/borrow rehearse --duration 30 --wake idle
+.build/debug/borrow run --timeout 600 --wake idle -- /usr/bin/make test
+.build/debug/borrow observe-codex --session /path/to/selected-session.jsonl --timeout 600 --wake experimental-ac
 ```
 
-To record a coding CLI, supply its absolute executable path and normal arguments after `--`. The recorder does not change the agent's permissions. A zero foreground-process exit is recorded as an exit, not certified task completion. Background descendants are not supervised, and their completion is not established.
+`--wake` accepts `off`, `idle`, or `experimental-ac`. It defaults to `off` in every mode. Use an absolute executable path after `--` for foreground commands; Borrow preserves the agent's permissions.
 
-`--timeout` is wall-clock time, including sleep. This prototype caps command recordings at one hour and rehearsals at ten minutes. Cancellation and timeouts send SIGTERM only to the foreground process Borrow launched. Programs may ignore that signal or leave descendants; Borrow does not sweep the machine or kill processes by name.
+Recording timeouts use wall-clock time, including sleep. Rehearsals are capped at ten minutes, command/session recordings at one hour. Cancellation and timeout request SIGTERM only for the foreground process Borrow launched. An uncooperative command or its descendants may remain; releasing the wake hold does not certify process-tree completion.
 
-Connectivity checks are off by default. `--network` explicitly enables periodic requests to `https://captive.apple.com/hotspot-detect.html`. Success establishes only that this endpoint answered. It does not establish provider health or that a live agent/SSH/remote-control connection survived.
+Completion must be observed before the recording deadline. After a delayed or suspended recorder resumes, finding an exited process does not establish timely completion; the recording can time out with the exit status left unverified.
 
-## Observe a real Codex session
+The CLI exits nonzero if Borrow cannot confirm cleanup of a requested wake hold, even if the foreground command exited zero. Inspect the report to distinguish a task failure from a cleanup failure.
 
-Choose **Observe Codex…** in the app and explicitly select one local `.jsonl` session log, normally under `~/.codex/sessions/`. The same mode is available through `observe-codex` above. Borrow attaches at the current end of the file. Existing events establish only internal turn bookkeeping; they do not inflate recorded activity.
+`--network` explicitly enables periodic requests to `https://captive.apple.com/hotspot-detect.html`. Checks are off by default. Success establishes only that this endpoint answered, not that an agent's model, VPN, SSH, or remote-control connection survived.
 
-New turn starts, completed tool items, turn ends, failures, and interruptions appear in the timeline. A logged turn end ends observation only when no other logged turn remains active and the stream is complete. **This observes a logged lifecycle; it does not independently verify the work.** No fresh events means no fresh evidence, not an inferred approval wait or a stuck agent.
+## Observe Codex
 
-The adapter reads the selected file locally. It persists fixed event labels, counts, and timestamps, discarding prompts, reasoning, messages, tool arguments/output, session paths, and turn IDs. Records over 1 MiB or malformed records make lifecycle completeness unknown. File replacement/truncation stops observation instead of silently replaying another source. Cancellation and timeout leave the observed agent untouched.
+Choose **Observe Codex…** and select one local `.jsonl` session journal, normally under `~/.codex/sessions/`. Borrow attaches at the current end. Historical activity is excluded from recorded activity counts.
 
-The parser supports the local journal shapes observed in Codex Desktop on this development machine, plus Codex `exec --json` lifecycle shapes. Local journals are an experimental integration surface and can change. Exec event shapes are documented in [OpenAI's source](https://github.com/openai/codex/blob/main/codex-rs/exec/src/exec_events.rs). This mode does not create or launch an agent, alter its permissions, install hooks, or change its configuration.
+New turn starts, tool completions, turn ends, failures, and interruptions appear in the timeline. Observation ends at a logged terminal boundary only when the stream is complete and no other logged turn remains active. A requested wake hold is released when observation ends. A missing event does not mean an agent is stuck or waiting for approval.
 
-## Read the evidence
+The adapter persists fixed labels, counts, and timestamps, discarding prompts, reasoning, messages, tool arguments/output, session paths, and raw turn IDs. File replacement/truncation stops observation. Malformed or oversized records make lifecycle completeness unknown. Events appended while closed can have been delivered late; they do not prove continuous execution.
 
-| Finding | What it means |
+An unfinished journal record keeps the boundary pending. A partial historical line can finish internal bookkeeping after attachment without being credited as new activity or falsely labelled malformed.
+
+Local journals are an experimental integration surface. The parser also supports [Codex exec lifecycle events](https://github.com/openai/codex/blob/main/codex-rs/exec/src/exec_events.rs). Logged completion and process exit remain distinct from acceptance-test verification. Borrow does not launch, configure, or terminate an externally observed agent.
+
+## Read and share the evidence
+
+| Finding | Meaning |
 | --- | --- |
-| Observed | The recording contains the specific evidence described beside the finding. |
-| Failed | The bounded check encountered a failure, such as a nonzero command exit or a failed connectivity probe. |
-| Unverified | Evidence is missing, insufficient, or ambiguous. |
-| Skipped | The check was disabled or this prototype does not perform it. |
+| Observed | The recording contains the specific evidence described. |
+| Failed | A bounded check encountered a failure. |
+| Unverified | Evidence is missing, insufficient, stale, or ambiguous. |
+| Skipped | The check was disabled or was not performed. |
 
-A delayed sample is an **observation gap**, not a sleep diagnosis. macOS before-sleep and wake notifications are separate signals; a before-sleep notification does not measure an execution pause. If power notifications and closed-lid worker progress coexist, the report preserves both facts and leaves uninterrupted operation unverified. A recorded closed-lid interval does not predict future compatibility. The rehearsal checks a disposable worker, not your agent's model connection or the quality of its work.
+A delayed sample is an observation gap, not a sleep diagnosis. A macOS before-sleep notification does not measure an execution pause. If notifications and closed-lid worker progress coexist, the report preserves both and leaves uninterrupted operation unverified.
 
-## Local data
+Recordings live under `~/Library/Application Support/Borrow/Runs/<run-id>/`. The app offers **Show files** and **Export report**; CLI `--output DIRECTORY` selects a different root. Reports contain machine/task metadata, including timestamps, OS version, process IDs, lid/power/thermal observations, and executable basename. Review them before sharing. [Privacy details](docs/privacy.md) explain what is kept and discarded.
 
-Recordings are stored under `~/Library/Application Support/Borrow/Runs/<run-id>/`:
+Atomic snapshots refresh roughly every five seconds and on orderly completion. A crash can leave a stale recording; Borrow keeps its result unknown. An OS timeout and owner-lifetime bound backstop the wake hold, and normal cleanup is recorded separately.
 
-- `recording.json`: versioned observations, events, conditions, and exit status.
-- `worker.json`: the independent rehearsal worker's latest heartbeat and final result.
-- `report.md`: readable findings and timeline after a normal recorder shutdown.
+## Validation and development
 
-The app's **Show files** and **Export report** buttons expose the results. CLI `--output DIRECTORY` uses another root; the app lists its default root only. No prompt text, command arguments, command output, environment variables, screenshots, or code are intentionally persisted. CLI command output passes through to the terminal. Reports do contain timestamps, OS version, process IDs, lid state, thermal state, battery percentage, and the executable's basename. Review before sharing.
+`BorrowCore` owns evidence, power probes, wake leases, and recording. `BorrowCLI` runs a foreground command or observes a journal. `BorrowApp` supplies native SwiftUI controls. The build script uses temporary scratch storage to avoid signing failures caused by synced-folder metadata.
 
-The app and recorder are separate processes. Closing the window does not stop a recording. Use **Cancel** before quitting; a recorder left running is bounded by its timeout. Atomic snapshots refresh roughly every five seconds and at completion. A crash can lose the latest few samples and leave a snapshot marked running; the app shows stale samples as unknown rather than inventing a completed outcome.
+- [Validation evidence](docs/validation.md) and [the first physical test](docs/physical-lid-close.md).
+- [Claude/OpenCode review and corrections](docs/claude-opencode-review.md).
+- [Current software handoff and deferred checks](docs/software-handoff.md).
+- [Real-agent test protocol and result status](docs/physical-agent-validation.md).
+- [Demo plan and completion status](docs/demo.md).
+- [Release checklist](docs/release-checklist.md) and [changelog](CHANGELOG.md).
+- [Product brief](docs/product-brief.md), competitive boundaries, and Ousel replacement gate.
 
-## Project direction
-
-The initial differentiation is a measurable rehearsal of the whole setup and evidence after an interrupted run. Keep-awake apps, cleanup utilities, and completion gates already exist. [The product brief](docs/product-brief.md) records the opportunity, limits, and release gates.
-
-Planned next steps:
-
-1. Physical closed-lid tests across machines, power sources, and macOS versions.
-2. Broader validation of the read-only Codex adapter, and explicit approval signals where a provider exposes them.
-3. Connection-specific probes and a small, reproducible interruption test suite.
-4. A signed, notarized build and short real-world demonstration.
-
-## Development
-
-`BorrowCore` owns records, findings, machine probes, and recording. `BorrowCLI` owns a foreground process or disposable worker. `BorrowApp` is a SwiftUI window and menu bar front end. Tests exercise evidence classification and persistence; CLI smoke tests exercise actual processes. Physical lid-close results must be documented separately.
+The first physical test observed 15 worker ticks in a short charger-connected closed interval under an existing keep-awake environment. It does not validate Borrow's new experimental hold. New physical results and the demo remain pending until actually collected. Wider compatibility needs other machines, networks, and power configurations.
 
 MIT licensed.

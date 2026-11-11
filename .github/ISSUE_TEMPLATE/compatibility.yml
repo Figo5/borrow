@@ -1,0 +1,39 @@
+name: Physical compatibility result
+description: Share a real lid-close result and its exact conditions.
+title: "Compatibility: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report what you physically observed. A worker tick, agent event, hold release, and actual sleep are different facts. Do not include prompts, raw journals, credentials, or private task output.
+  - type: input
+    id: setup
+    attributes:
+      label: Mac model, macOS, and Borrow version
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Hold mode
+      options:
+        - Off
+        - Idle
+        - Experimental AC
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Physical test conditions
+      description: Power source, display/peripherals, network, other wake holds, task type without private contents, total duration, and lid-closed duration.
+    validations:
+      required: true
+  - type: textarea
+    id: observations
+    attributes:
+      label: Observations and limits
+      description: Describe sampled progress, terminal/logged events, Borrow hold release, and separately observed sleep/wake. Mark anything you did not observe as unknown.
+    validations:
+      required: true

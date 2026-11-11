@@ -1,0 +1,45 @@
+name: Bug report
+description: Report an unexpected Borrow behavior or evidence finding.
+title: "Bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a minimal, disposable example. Review reports before sharing. Do not attach raw agent journals, prompts, credentials, command output, or private source code.
+  - type: input
+    id: version
+    attributes:
+      label: Borrow version and build source
+      placeholder: "0.3.0 preview, locally built on Apple Silicon"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Hold mode
+      options:
+        - Off
+        - Idle
+        - Experimental AC
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Mac model, macOS version, power source, external display/peripherals, network type, and other keep-awake software.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps and observed result
+      description: State what you did, what you expected, and what Borrow actually showed. Separate hold release from actual sleep and agent correctness.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reviewed evidence excerpt (optional)
+      description: Include only relevant, redacted report findings or timestamps. A report is optional; no raw journal is needed.

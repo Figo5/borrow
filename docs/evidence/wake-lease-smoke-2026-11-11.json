@@ -1,0 +1,138 @@
+[
+  {
+    "case": "off-success",
+    "exit": 0,
+    "status": "completed",
+    "powerState": null,
+    "releaseReason": null,
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "off-nonzero",
+    "exit": 1,
+    "status": "completed",
+    "powerState": null,
+    "releaseReason": null,
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "idle-success",
+    "exit": 0,
+    "status": "completed",
+    "powerState": "released",
+    "releaseReason": "completed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "idle-nonzero",
+    "exit": 1,
+    "status": "completed",
+    "powerState": "released",
+    "releaseReason": "completed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "experimental-ac-success",
+    "exit": 0,
+    "status": "completed",
+    "powerState": "released",
+    "releaseReason": "completed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "experimental-ac-nonzero",
+    "exit": 1,
+    "status": "completed",
+    "powerState": "released",
+    "releaseReason": "completed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "idle-missing-executable",
+    "exit": 1,
+    "status": "interrupted",
+    "powerState": "released",
+    "releaseReason": "launchFailed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "idle-timeout",
+    "exit": 124,
+    "status": "timedOut",
+    "powerState": "released",
+    "releaseReason": "timedOut",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "idle-cancel",
+    "exit": 130,
+    "status": "cancelled",
+    "powerState": "released",
+    "releaseReason": "cancelled",
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "idle-recorder-crash",
+    "exit": -9,
+    "status": "running",
+    "powerState": "active",
+    "releaseReason": null,
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "idle-stopped-recorder-expiry",
+    "exit": 124,
+    "status": "timedOut",
+    "powerState": "released",
+    "releaseReason": "timedOut",
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "experimental-ac-missing-executable",
+    "exit": 1,
+    "status": "interrupted",
+    "powerState": "released",
+    "releaseReason": "launchFailed",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "experimental-ac-timeout",
+    "exit": 124,
+    "status": "timedOut",
+    "powerState": "released",
+    "releaseReason": "timedOut",
+    "ownedAssertionGone": null
+  },
+  {
+    "case": "experimental-ac-cancel",
+    "exit": 130,
+    "status": "cancelled",
+    "powerState": "released",
+    "releaseReason": "cancelled",
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "experimental-ac-recorder-crash",
+    "exit": -9,
+    "status": "running",
+    "powerState": "active",
+    "releaseReason": null,
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "experimental-ac-stopped-recorder-expiry",
+    "exit": 124,
+    "status": "timedOut",
+    "powerState": "released",
+    "releaseReason": "timedOut",
+    "ownedAssertionGone": true
+  },
+  {
+    "case": "experimental-helper-exit",
+    "exit": 1,
+    "status": "interrupted",
+    "powerState": "released",
+    "releaseReason": "holdLost",
+    "ownedAssertionGone": true
+  }
+]

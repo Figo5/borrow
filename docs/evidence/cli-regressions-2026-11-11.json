@@ -1,0 +1,27 @@
+{
+  "osSmokeCases": 17,
+  "lateExitRegression": {
+    "exit": 124,
+    "status": "timedOut",
+    "taskExit": null,
+    "timeout": 3,
+    "taskDuration": 4,
+    "recorderPause": 5
+  },
+  "privateCLIInputs": [
+    {
+      "exit": 1,
+      "sentinelRedacted": true
+    },
+    {
+      "exit": 1,
+      "sentinelRedacted": true
+    }
+  ],
+  "startupCancellationCases": 15,
+  "startupExitCounts": {
+    "-15": 6,
+    "130": 9
+  },
+  "globalPowerSettingsUnchanged": true
+}

@@ -4,7 +4,7 @@ Date: November 10, 2026
 
 ## Promise
 
-Before leaving a local AI task unattended, rehearse the setup. After an interrupted run, inspect the observed sequence instead of guessing whether power, connectivity, the process, or a human-input wait stopped progress.
+Give a local task a temporary, bounded wake hold and release Borrow's own hold when recording ends. Rehearse the setup before leaving it unattended, then inspect the observed power, connectivity, process, and logged-agent sequence. Supported idle prevention and experimental AC-only closed-lid behavior are distinct; physical evidence determines what can be claimed.
 
 ## Why this might earn attention
 
@@ -33,7 +33,9 @@ These are documented claims and positioning, not hands-on benchmarks. Absence fr
 
 Implemented: native window/menu, bounded independent-worker rehearsal, foreground command recording, opt-in read-only Codex session observation, lid polling, macOS sleep/wake notifications, battery and thermal observations, optional Apple connectivity probe, local JSON, Markdown export, and evidence rules.
 
-Not implemented: global keep-awake control, power-setting restoration tests, provider-specific connection health, approval-state adapters, automatic recovery, recursive process cleanup, semantic acceptance criteria, Developer ID signed distribution, or a public compatibility promise. The Codex adapter records whitelisted log events; it does not establish task correctness or infer stuck/waiting states.
+The approved 0.3 development scope adds opt-in, bounded recorder-owned wake holds with acquisition/release evidence, native controls, and failure-path cleanup. [The task list](task_list.md) tracks implementation and validation. The AC-only path remains experimental until tested on the actual setup; releasing a hold does not prove the Mac slept.
+
+Outside scope: global power-setting changes, provider-specific connection health, approval-state adapters, automatic recovery, recursive process cleanup, semantic acceptance criteria, and a general closed-lid compatibility promise. Developer ID distribution needs an identity not currently available locally. The Codex adapter records whitelisted log events; it does not establish task correctness or infer stuck/waiting states.
 
 ## Validate the opportunity
 
