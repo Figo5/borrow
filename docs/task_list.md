@@ -4,7 +4,7 @@ November 10, 2026 · ECC `orch-add-feature` · size: **large**
 
 **Gate 1: approved by the user on November 10, 2026.** The approved scope includes Off by default, supported idle-sleep prevention, and an explicitly experimental AC-only hold, plus real-agent physical validation, an authentic demo, and release preparation. Implementation may proceed through testing and review. Gate 2 still requires a reviewed diff and proposed commit messages before committing.
 
-**November 11 handoff:** Claude Code and OpenCode reviewed the candidate; core and integration corrections pass 70 tests plus fresh CLI/OS/package verification. The user deferred the physical trial and approved Gate 2 for committing and pushing the private software preview. Native video and corrected-build UI verification remain pending because native controls were unreliable. Source and reviewable archives are prepared; hosted checks follow the push. Publication and Ousel archival are not complete. See [the collaboration record](claude-opencode-review.md).
+**November 12 follow-up:** Claude Code and OpenCode reviewed the candidate; the approved software commits were pushed and final hosted Intel checks passed on `7e9b97a`. The same revision passed all 73 local tests with native integration enabled and a clean Apple Silicon package/extraction check. The operator requested all remaining software and release preparation before the deferred physical trial. Publication and Ousel archival remain incomplete. See [the software handoff](software-handoff.md) and [collaboration record](claude-opencode-review.md).
 
 ## Intended outcome and feasibility decision
 

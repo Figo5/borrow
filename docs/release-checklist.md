@@ -4,18 +4,18 @@ Target: **0.3.0 preview**. This is a preparation checklist, not a statement that
 
 ## Candidate verification
 
-- [ ] The final source resource version, app footer/CLI version, plist version, ZIP label, and release notes agree. The November 10 package matched 0.3.0/build 4; verify again after the November 11 corrections.
-- [x] Meaningful evidence/lifecycle tests pass on corrected source, including backward-readable older recordings: 70 tests with native integration enabled; see [current review evidence](claude-opencode-review.md).
-- [ ] Final native UI verifies Off, Idle, and Experimental AC selection, active hold state, cancellation, report inspection, and export. Prior candidate: Off-mode Codex observation, experimental acquisition/Quit, and idle completion/export were observed; repeat affected flows after fixes.
+- [x] Final source resource, native footer, packaged helper, plist, ZIP label, and release notes agree on 0.3.0/build 4. The November 12 Apple Silicon build uses clean revision `7e9b97a`.
+- [x] Meaningful evidence/lifecycle tests pass, including backward-readable older recordings: all 73 tests with native integration enabled on November 12; see [the validation record](wake-lease-validation.md).
+- [x] Final native UI verifies Off, Idle, and Experimental AC selection, confirmed hold/deadline, Stop, Quit cleanup, report inspection/export, restart default and external-recorder ownership. See [November 12 evidence](wake-lease-validation.md#november-12-final-software-check).
 - [x] Prior-candidate owned-process checks verified creation/release after success, nonzero exit, cancellation, timeout, launch failure, and crash: 17 cases, including bounded experimental-helper cleanup. Final corrected-build checks are tracked separately below.
 - [ ] AC removal is handled explicitly by experimental mode; no global power setting, privileged helper, unrelated process termination, or automatic forced sleep is introduced.
 - [x] `bash scripts/build-app.sh` succeeds; the extracted Apple Silicon archive preserves executable permissions and passes `codesign --verify --deep --strict` before any synced-folder metadata is added.
 - [x] The extracted recorder reports `0.3.0` without access to the removed temporary build directory.
 - [x] `SHA256SUMS` verifies the version/architecture ZIP and `Borrow.zip`; `BUILD-INFO.txt` identifies source and ad-hoc signing accurately.
-- [ ] Final GitHub checks pass. Hosted Intel results and local Apple Silicon results are named separately.
-- [x] The corrected November 11 build passes targeted regressions, 70 full/native tests, 17 fresh OS cases, and extracted-package verification. CI includes the extracted-package step, but has not run the uncommitted workflow.
+- [x] [Final GitHub checks pass](https://github.com/Figo5/borrow/actions/runs/43086166624) on `7e9b97a`: default tests, Intel build, extracted-package verification, artifact upload. Hosted Intel and local Apple Silicon results remain separately labelled.
+- [x] The corrected candidate passed targeted regressions, 17 OS cases, and extracted-package verification. The final revision also passed all 73 local/native tests and a clean Apple Silicon build on November 12.
 
-The November 11 [software handoff](software-handoff.md) records the corrected archive location and the operator-deferred physical/video work. Native UI control was unreliable, so the corrected archive has not received a fresh visual UI pass. Old and new verification evidence are kept separate.
+The [software handoff](software-handoff.md) records the current archive location and operator-deferred physical/video work. The corrected candidate received a fresh visual UI pass on November 12 after the old app was closed. Historical and current verification evidence remain separately dated.
 
 ## Physical evidence and demo
 
@@ -32,7 +32,10 @@ Longer real-agent closed-lid validation and the end-to-end demo are pending unti
 
 - [x] README gives a concrete example, source build/install instructions, privacy link, and mode/compatibility limits. All six documented public CLI options and all three modes match the source and packaged `--help` output.
 - [x] Draft release notes state experimental status, artifact/architecture labels, and ad-hoc signing. No notarized or universal-build claim is implied; final physical/demo outcomes remain to be filled in.
+- [x] Combined local review assets retain the clean Apple Silicon build, matching hosted Intel package, source archive, architecture-specific provenance and checksums. See [artifact status](preview-artifacts.md).
+- [x] Private unpublished draft `v0.3.0-preview` prepared with ten assets. Repository visibility remains private and no tag reference was created. Publication is still pending.
 - [x] Review candidate public files and chosen reports for private material; inspect history filenames. A targeted scan of 45 candidate text files found no apparent credential material or specific private journal paths. Five commits contain 24 unique history filenames, with no credential/journal/session-directory filenames. This is a targeted source scan and history filename inventory, not a guarantee about every historical blob. Local recordings are excluded from package/artifact paths.
+- [x] November 12 targeted scan checked all 60 candidate text files, including new native and live Codex evidence, with no credential, private-key or private journal-path matches. All 57 local Markdown links/anchors resolve. This is a bounded scan, not an exhaustive historical secret audit.
 - [x] Review final diff and proposed commits at orchestration Gate 2. The user approved committing/pushing the private software preview on November 11; physical and public-release gates remain separate.
 - [ ] Review release notes and assets before any repository visibility change, tag, release publication, or announcement. Preparation is not publication authorization.
 - [ ] Revisit Ousel only after Borrow's original readiness gates are met, including a useful real-agent run and honest demo. Preserve Ousel's history; then update portfolio/profile links and archive notice before archiving it.
@@ -45,4 +48,4 @@ The November 10 documentation pass inspected 21 Markdown files and resolved all 
 
 Both issue forms ask for bounded setup/observation details, separate hold release from system sleep and task correctness, and explicitly discourage raw journals, prompts, credentials, private source, and tool output. The optional evidence field requests only reviewed excerpts. The third YAML file configures blank-issue availability rather than a data-collection form.
 
-The earlier local-link review found no missing targets. The November 11 OpenCode review identified stale demo/checklist wording, which has been reconciled with the actual prior evidence. The five-to-ten-minute physical comparison, actual post-task sleep, native demo, final corrected-build/GitHub checks, Gate 2, and publication retain their separate pending status. Recheck links and claims when new artifacts change the documents.
+The earlier local-link review found no missing targets. The November 12 pass reconciles previously stale hosted-check claims with the successful final run. The five-to-ten-minute physical comparison, actual post-task sleep, final native demo, and publication retain their separate pending status. The software commits were approved and pushed on November 11; this documentation refresh has its own commit review. Recheck links and claims when new artifacts change the documents.

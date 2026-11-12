@@ -1,6 +1,6 @@
 # Borrow native demo plan
 
-**Status: partly rehearsed; video pending.** The native idle rehearsal completed with its expected artifact, confirmed hold release, and [report export](evidence/native-idle-rehearsal.md). No finished video or new five-to-ten-minute real-agent closed-lid result exists.
+**Status: software flow rehearsed November 12; capture deferred by the operator.** The fresh `7e9b97a` native build passed mode/state, Off completion, Idle Stop/export, Experimental AC Quit cleanup, restart and external-recorder ownership checks. The [latest native export](evidence/native-idle-stop-2026-11-12.md) preserves the intentionally cancelled Idle run. No finished video or new five-to-ten-minute real-agent closed-lid result exists.
 
 The demo follows real [physical-agent validation](physical-agent-validation.md). It should show what Borrow can establish, including a failed or inconclusive experimental attempt if that is the actual result.
 
@@ -42,12 +42,18 @@ If the physical experiment is unsuccessful, the result scene should display that
 
 | Field | Result |
 | --- | --- |
-| Built revision/version | Native rehearsal: 0.3.0, build 4; November 11 fixes need final package verification |
-| Actual recording route and permission state | Native Screenshot controls were not exposed through automation; QuickTime New Screen Recording became disabled. Cause not established; no permission diagnosis is claimed. |
-| Discovery and rehearsal | Idle rehearsal and export completed; the full physical-demo flow remains pending |
+| Built revision/version | 0.3.0, build 4, `7e9b97a`; clean Apple Silicon build and extracted-package verification passed November 12; hosted Intel package verification also passed |
+| Actual recording route and permission state | November 12 Screenshot exposed Record Selected Window, but subsequent control timed out. Earlier QuickTime behavior differed. No permission diagnosis is claimed. The operator chose to capture later. |
+| Discovery and rehearsal | Fresh native software flow completed with lid open, including export and Quit cleanup; the full physical-demo flow remains pending |
 | Physical run used | Pending |
 | Capture and final artifact | Pending |
 | Elapsed-time cut labelled | Pending |
 | Full playback reviewed | Pending |
 | Privacy and claim review | Pending |
-| Remaining blocker | A real closed-lid interval and a usable native capture route are still required |
+| Remaining blocker | Capture was deferred by the operator. The physical chapter also requires the real closed-lid interval. |
+
+## Software chapter prepared for later capture
+
+Borrow is left idle with a 30-second length, Prevent idle sleep selected, and connectivity checks off. No recording or Borrow wake hold is active. Before capture, inspect the current window again and use Screenshot's **Record Selected Window** for Borrow only, with microphone **None** and an explicit save location under the project output directory.
+
+Label this chapter **Open-lid software demonstration; closed-lid compatibility untested**. Show the selected mode's limitation, start the actual rehearsal, show its confirmed hold and finite deadline, let the worker finish, then show the released hold, successful final artifact, and unverified closed-lid/post-task-sleep findings. Exporting the report was rehearsed separately. Keep file-picker paths out of public footage. No physical result, elapsed-time cut or agent-success claim belongs in this open-lid chapter.

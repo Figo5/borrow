@@ -1,0 +1,149 @@
+{
+  "date": "2026-11-12",
+  "sourceRevision": "7e9b97a0d2121b7b123c8e8b963d8f64fea62cc6",
+  "version": "0.3.0",
+  "build": 4,
+  "architecture": "arm64",
+  "hardware": "Mac14,9",
+  "macOS": "Version 27.0.1 (Build 26A434)",
+  "nativeIntegrationTests": {
+    "passed": 73,
+    "skipped": 0
+  },
+  "uiCases": [
+    {
+      "case": "native-off-completion",
+      "id": "829A03A3-B9B1-413B-BD6B-1201BBFDBDC3",
+      "startedAt": "2026-11-12T13:13:06Z",
+      "endedAt": "2026-11-12T13:13:39Z",
+      "status": "completed",
+      "exitCode": 0,
+      "plannedSeconds": 30,
+      "verifiedWorkerHeartbeat": 30,
+      "networkEnabled": false,
+      "power": null,
+      "samples": 32,
+      "closedSamples": 0,
+      "acSamples": 32
+    },
+    {
+      "case": "native-idle-stop",
+      "id": "6E2B6DFA-6A11-448C-B819-72F57C8FE148",
+      "startedAt": "2026-11-12T13:14:13Z",
+      "endedAt": "2026-11-12T13:14:21Z",
+      "status": "cancelled",
+      "exitCode": null,
+      "plannedSeconds": 30,
+      "verifiedWorkerHeartbeat": null,
+      "networkEnabled": false,
+      "power": {
+        "acquiredAt": "2026-11-12T13:14:13Z",
+        "cleanup": "released",
+        "deadline": "2026-11-12T13:14:58Z",
+        "mode": "idle",
+        "releaseReason": "cancelled",
+        "releasedAt": "2026-11-12T13:14:21Z",
+        "state": "released"
+      },
+      "samples": 9,
+      "closedSamples": 0,
+      "acSamples": 9
+    },
+    {
+      "case": "native-experimental-quit",
+      "id": "4D90F0D3-903B-44B7-8AE9-FF5084486FCF",
+      "startedAt": "2026-11-12T13:14:49Z",
+      "endedAt": "2026-11-12T13:14:59Z",
+      "status": "cancelled",
+      "exitCode": null,
+      "plannedSeconds": 30,
+      "verifiedWorkerHeartbeat": null,
+      "networkEnabled": false,
+      "power": {
+        "acquiredAt": "2026-11-12T13:14:49Z",
+        "cleanup": "released",
+        "deadline": "2026-11-12T13:15:34Z",
+        "mode": "experimental-ac",
+        "releaseReason": "cancelled",
+        "releasedAt": "2026-11-12T13:14:59Z",
+        "state": "released"
+      },
+      "samples": 10,
+      "closedSamples": 0,
+      "acSamples": 10
+    },
+    {
+      "case": "external-recorder-survives-ui-quit",
+      "id": "86BA7D2B-C2F1-4C8B-B594-F347EE693292",
+      "startedAt": "2026-11-12T13:15:40Z",
+      "endedAt": "2026-11-12T13:16:12Z",
+      "status": "completed",
+      "exitCode": 0,
+      "plannedSeconds": 30,
+      "verifiedWorkerHeartbeat": 30,
+      "networkEnabled": false,
+      "power": {
+        "acquiredAt": "2026-11-12T13:15:40Z",
+        "cleanup": "released",
+        "deadline": "2026-11-12T13:16:25Z",
+        "mode": "idle",
+        "releaseReason": "completed",
+        "releasedAt": "2026-11-12T13:16:12Z",
+        "state": "released"
+      },
+      "samples": 32,
+      "closedSamples": 0,
+      "acSamples": 32
+    },
+    {
+      "case": "native-codex-idle-stop",
+      "id": "887EB0B0-EDE6-43EA-89E1-211E91BA6F7E",
+      "startedAt": "2026-11-12T13:24:55Z",
+      "endedAt": "2026-11-12T13:25:18Z",
+      "status": "cancelled",
+      "exitCode": null,
+      "plannedSeconds": 30,
+      "networkEnabled": false,
+      "power": {
+        "acquiredAt": "2026-11-12T13:24:57Z",
+        "cleanup": "released",
+        "deadline": "2026-11-12T13:25:25Z",
+        "mode": "idle",
+        "releaseReason": "cancelled",
+        "releasedAt": "2026-11-12T13:25:18Z",
+        "state": "released"
+      },
+      "samples": 21,
+      "closedSamples": 0,
+      "acSamples": 21,
+      "newLifecycleEvents": 3,
+      "eventKinds": [
+        "agentAttached",
+        "started",
+        "wakeAcquired",
+        "lid",
+        "agent.toolCompleted",
+        "agent.toolCompleted",
+        "agent.toolCompleted",
+        "cancelled",
+        "wakeReleased"
+      ],
+      "toolCompletions": 3
+    }
+  ],
+  "observedUI": [
+    "All three wake modes selectable with scope guidance",
+    "Active owned hold and finite deadline displayed",
+    "Idle Stop displayed confirmed release",
+    "Experimental Command-Q ended owned recorder and app; persisted confirmed release",
+    "Native export saved reviewed Markdown",
+    "Restart defaulted to Off",
+    "External recorder displayed view-only ownership notice with no Stop action",
+    "External recorder remained alive after UI Quit and later completed with release",
+    "Native selected-session observation recorded 3 tool completions; Stop released Borrow idle hold while this agent continued running"
+  ],
+  "actualSystemSleep": "unverified",
+  "lidCloseTestPerformed": false,
+  "unplugTestPerformed": false,
+  "demoCapture": "operator deferred"
+}

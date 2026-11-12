@@ -92,15 +92,35 @@ The corrected **release** binary passed the [17 OS smoke cases again](evidence/w
 - Fifteen immediate startup cancellations ended promptly: six by default SIGTERM before handler setup and nine through cancellation exit `130`. No full-length run was observed.
 - Read-only global power-setting output was unchanged before and after the checks.
 
-A copied source archive nested inside another Git repository built successfully and correctly reported `source-archive`, rather than the enclosing revision. Its extracted ad-hoc signature, architecture, helper version/help, and resource lookup passed `scripts/verify-package.sh`. CI now contains this extraction check; the uncommitted workflow has not run on GitHub.
+A copied source archive nested inside another Git repository built successfully and correctly reported `source-archive`, rather than the enclosing revision. Its extracted ad-hoc signature, architecture, helper version/help, and resource lookup passed `scripts/verify-package.sh`. The final hosted workflow subsequently passed this extraction check.
 
-The final archive is under `dist/preview-2026-11-11/`. It was built separately because native UI control was unreliable; no fresh corrected-build UI pass or video is claimed. The user deferred the physical trial on November 11. Release of a hold still does not establish actual system sleep.
+The November 11 archive is retained under `dist/preview-2026-11-11/`. It was built separately because native UI control was unreliable at that time. The November 12 follow-up below supersedes its package/UI status. The user deferred the physical trial; release of a hold still does not establish actual system sleep.
 
 ### Hosted packaging follow-up
 
 The first hosted run after the approved push passed tests and compilation, but extracted-helper verification exposed a SwiftPM resource-search difference: that toolchain searched beside the helper or in the deleted build directory instead of the app's `Contents/Resources`. The version loader now resolves packaged app/helper resources explicitly, while source builds retain SwiftPM resource lookup. A missing packaged resource returns a detectable development version rather than evaluating a fatal generated accessor.
 
-Three added regression tests cover app and helper paths, both resource-bundle layouts, missing packaged resources, and source fallback. The follow-up local suite passed with 73 tests discovered: 70 ran and the three opt-in native tests were disabled. The earlier 70-test native-enabled run remains the power-lifecycle evidence; no power logic changed in this packaging fix. Hosted results for the follow-up are recorded on GitHub.
+Three added regression tests cover app and helper paths, both resource-bundle layouts, missing packaged resources, and source fallback. The initial follow-up suite passed with 73 tests discovered: 70 ran and the three opt-in native tests were disabled. No power logic changed in this packaging fix. [Hosted run 43086166624](https://github.com/Figo5/borrow/actions/runs/43086166624) passed on `7e9b97a`, including default tests, Intel packaging, extraction verification and artifact upload.
+
+### November 12 final software check
+
+Clean revision `7e9b97a` passed **all 73 tests with `BORROW_POWER_INTEGRATION=1`**, with none skipped. Actual native idle acquisition/release, OS expiry, and experimental AC helper assertion/release checks passed. These were short open-lid checks, not a physical compatibility trial. Historical coverage figures above were not remeasured for this follow-up.
+
+A fresh clean-checkout Apple Silicon 0.3.0/build 4 package passed extracted signature, executable, architecture, resource version and help checks. The default `dist/Borrow.app` was refreshed only after the old instance was closed. The matching Intel artifact was retained from the successful hosted run; no local Intel execution is claimed. Current release files are under `dist/preview-2026-11-12/`.
+
+The fresh native UI pass completed on Mac14,9 / macOS 27.0.1 (26A434), with AC connected, connectivity probes off, and **zero closed-lid samples**:
+
+| Flow | Observed result |
+| --- | --- |
+| Off, 30-second rehearsal | Completed, matching final artifact, no requested hold |
+| Idle, Stop | Active hold/deadline displayed; cancelled recording confirmed its own release |
+| Experimental AC, Command-Q | Active experimental hold/deadline displayed; Quit ended the owned recorder, persisted release, then exited |
+| Restart | Default wake mode returned to Off |
+| Export | Native save panel wrote the [unaltered idle Stop report](evidence/native-idle-stop-2026-11-12.md) |
+| External recorder | App displayed view-only ownership and no Stop action; UI Quit left the CLI recorder alive; it subsequently completed and released its own hold |
+| Live Codex observation | Native picker attached to the deliberately selected session; three new tool completions appeared; Stop confirmed idle-hold release while this agent continued running. The [unaltered report](evidence/native-codex-stop-2026-11-12.md) retains the unverified turn outcome. |
+
+[Sanitized run identifiers, times and outcomes](evidence/native-software-check-2026-11-12.json) preserve the checks. No unplug stimulus or independent post-task sleep observation occurred. The operator deferred demo capture on November 12 after the software flow was rehearsed.
 
 ## Remaining evidence
 
