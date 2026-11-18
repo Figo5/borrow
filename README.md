@@ -106,7 +106,7 @@ Atomic snapshots refresh roughly every five seconds and on orderly completion. A
 - [Validation evidence](docs/validation.md) and [the first physical test](docs/physical-lid-close.md).
 - [November 18 case study](https://gfiore.com/borrow) and [closed-lid hardware report](https://gfiore.com/projects/borrow-hardware-comparison.md).
 - [Release notes](docs/release-notes.md) and [release checklist](docs/release-checklist.md).
-- [Claude/OpenCode review and corrections](docs/claude-opencode-review.md).
+- [Validation findings and corrections](docs/validation-findings.md).
 - [November 12 software handoff (historical)](docs/software-handoff.md).
 - [Real-agent test protocol and result status](docs/physical-agent-validation.md).
 - [Demo plan and completion status](docs/demo.md).

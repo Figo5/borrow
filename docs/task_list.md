@@ -1,10 +1,10 @@
 # Borrow: task-scoped wake control, physical validation, demo, and release
 
-November 10, 2026 · ECC `orch-add-feature` · size: **large**
+November 10, 2026 · size: **large**
 
-**Gate 1: approved by the user on November 10, 2026.** The approved scope includes Off by default, supported idle-sleep prevention, and an explicitly experimental AC-only hold, plus real-agent physical validation, an authentic demo, and release preparation. Implementation may proceed through testing and review. Gate 2 still requires a reviewed diff and proposed commit messages before committing.
+**Scope approved by the user on November 10, 2026.** The approved scope includes Off by default, supported idle-sleep prevention, and an explicitly experimental AC-only hold, plus real-agent physical validation, an authentic demo, and release preparation. Implementation may proceed through testing and review. A reviewed diff and proposed commit messages are still required before committing.
 
-**November 12 follow-up:** Claude Code and OpenCode reviewed the candidate; the approved software commits were pushed and final hosted Intel checks passed on `7e9b97a`. The same revision passed all 73 local tests with native integration enabled and a clean Apple Silicon package/extraction check. The operator requested all remaining software and release preparation before the deferred physical trial. Publication and Ousel archival remain incomplete. See [the software handoff](software-handoff.md) and [collaboration record](claude-opencode-review.md).
+**November 12 follow-up:** The candidate was reviewed and corrected; the approved software commits were pushed and final hosted Intel checks passed on `7e9b97a`. The same revision passed all 73 local tests with native integration enabled and a clean Apple Silicon package/extraction check. The operator requested all remaining software and release preparation before the deferred physical trial. Publication and Ousel archival remain incomplete. See [the software handoff](software-handoff.md) and [validation findings](validation-findings.md).
 
 ## Intended outcome and feasibility decision
 
@@ -32,7 +32,7 @@ Releasing Borrow's hold means only that Borrow no longer requests wakefulness. O
 
 **Files:** new `Sources/BorrowCore/WakeLease.swift`, new `Tests/BorrowCoreTests/WakeLeaseTests.swift`, `Sources/BorrowCore/Recorder.swift`.
 
-**Depends on:** Gate 1 approval. **Risk:** high; this is the power-control boundary.
+**Depends on:** approved scope. **Risk:** high; this is the power-control boundary.
 
 - Write failing tests for explicit acquisition, release exactly once, acquisition failure, expiration, owner exit, cancellation, and unexpected helper exit.
 - Put lease ownership in the recorder process, which already owns the recording lifecycle. The UI must not own a second independent hold.
@@ -70,7 +70,7 @@ Releasing Borrow's hold means only that Borrow no longer requests wakefulness. O
 - Compare read-only assertion snapshots before/during/after each relevant run. Filter to Borrow-owned identifiers in saved evidence rather than dumping unrelated processes or arguments.
 - Verify privacy sentinels and release handling when persistence fails. Read-only observation must never terminate its agent.
 - Measure the cancellation/release latency bound, including the optional connectivity request and sampling loop; avoid an instantaneous-release promise.
-- Package and check the app, CLI help, version consistency, ZIP architecture, and ad-hoc signature. Run independent code and security reviews; resolve critical/high findings before Gate 2.
+- Package and check the app, CLI help, version consistency, ZIP architecture, and ad-hoc signature. Run independent code and security reviews; resolve critical/high findings before the commit gate.
 
 **Acceptance:** the report accurately reflects every lifecycle outcome and cleanup limitation. No test changes global power settings or kills another process. Existing rehearsal and Codex features remain working.
 
@@ -120,9 +120,9 @@ Releasing Borrow's hold means only that Borrow no longer requests wakefulness. O
 
 ## Review and commit gate
 
-Implementation delegates to the TDD phase, followed by independent Swift/code review and security review (paths, subprocesses, external probes, and release workflow inputs are in scope). Resolve critical/high findings and material test failures before presenting the final diff.
+Implementation is followed by independent Swift/code review and security review (paths, subprocesses, external probes, and release workflow inputs are in scope). Resolve critical/high findings and material test failures before presenting the final diff.
 
-At Gate 2, present the actual diff, validation results, physical-test outcome, demo, release assets, remaining blockers, and proposed logical commits, for example:
+Before committing, present the actual diff, validation results, physical-test outcome, demo, release assets, remaining blockers, and proposed logical commits, for example:
 
 - `feat: add bounded task-owned wake leases`
 - `feat: expose wake controls and lease evidence`

@@ -73,7 +73,7 @@ A separate copy of the source, fixtures, version resource, build script, and lic
 
 ## November 11 corrected candidate
 
-After the [Claude/OpenCode reviews](claude-opencode-review.md), the complete corrected suite passed **70 tests with native integration enabled**, including all three real power tests. Unknown readings remain unknown, no-created-resource cleanup does not invent a release, stale exports are labelled, and partial log records cannot prematurely end an observation. Startup cancellation or an already-passed deadline creates no hold or foreground task. Completion first observed after the deadline is not reported as timely completion.
+After the [source corrections](validation-findings.md), the complete corrected suite passed **70 tests with native integration enabled**, including all three real power tests. Unknown readings remain unknown, no-created-resource cleanup does not invent a release, stale exports are labelled, and partial log records cannot prematurely end an observation. Startup cancellation or an already-passed deadline creates no hold or foreground task. Completion first observed after the deadline is not reported as timely completion.
 
 | Source | Line coverage | Region coverage |
 | --- | ---: | ---: |

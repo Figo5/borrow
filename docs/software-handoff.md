@@ -14,7 +14,7 @@ The user deferred the physical trial, reviewed the software handoff, and approve
 - Native controls, app-instance ownership labels, first-run guidance, and redacted CLI error boundaries.
 - Architecture-labelled packaging, checksums, source provenance, extracted-package verification in CI, documentation, and issue forms.
 
-[Claude and OpenCode](claude-opencode-review.md) contributed independent reviews; Claude implemented core corrections and Codex integrated and verified the result.
+Core corrections and their verification are recorded in [the validation findings](validation-findings.md).
 
 ## Verified
 
@@ -55,7 +55,7 @@ The fresh native UI pass verified all modes, hold/deadline display, Stop, Quit c
 
 The five-minute real-agent closed-lid trial and physical unplug test remain deferred. An existing unrelated keep-awake hold must be left alone unless the operator manages it; any resulting confounding must remain explicit. Actual post-task sleep, a finished native demo, and wider compatibility are unverified.
 
-At orchestration Gate 2, the user approved these commits:
+The user approved these commits:
 
 1. `feat: add bounded wake holds and reliable task recording`
 2. `docs: prepare Borrow preview and validation handoff`

@@ -1,6 +1,6 @@
 # Exploration: task-scoped power control and release preparation
 
-November 10, 2026. Phase 0–1 investigation for the orchestration plan. This document records code inspection and read-only local inventory; no new power control, physical validation, or release was performed.
+November 10, 2026. Pre-implementation investigation. This document records code inspection and read-only local inventory; no new power control, physical validation, or release was performed.
 
 ## Entry points and execution flow
 
@@ -47,7 +47,7 @@ A native demo should show actual launch, requested protection state and deadline
 ## Local inventory and release gaps
 
 - Apple Silicon host with Swift 6.4 and Xcode selected; the selected Swift compiler passed strict code-signature verification.
-- Codex CLI launcher is available through its installed npm script; Claude CLI is also present and its native binary passed strict code-signature verification. Neither agent was launched in this investigation, and no authentication/configuration or session content was read.
+- The Codex CLI launcher is available through its installed npm script. No agent was launched in this investigation, and no authentication/configuration or session content was read.
 - A development signing identity exists. No Developer ID Application identity was found. Do not present the current ad-hoc build as notarized or ready for frictionless public installation.
 - `scripts/build-app.sh` builds and ad-hoc signs in a temporary directory, packages `Borrow.app` plus helper, verifies signatures, and copies to ignored `dist/`. It produces the build host's architecture; the Apple Silicon local package and Intel CI package are different binaries.
 - GitHub repository `Figo5/borrow` remains private and has no release entries. The current main workflow tests and builds on an Intel macOS runner, but does not upload artifacts or publish releases.
@@ -64,4 +64,4 @@ The Ousel readiness gate remains in force. No archive/profile change should prec
 4. Prepare the real-agent physical test and native demo, then collect only the evidence the operator can actually produce.
 5. Package a reviewable prerelease and public-facing documentation, preserving repository visibility until explicitly changed.
 
-Implementation and commits wait for the orchestration approval gates.
+Implementation and commits wait for the applicable approval gates.
