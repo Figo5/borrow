@@ -1,5 +1,7 @@
 # Preview artifacts and provenance
 
+> **Historical report — November 12, 2026.** Preserved as written for internal review of the older `7e9b97a` build. It is not current release guidance or a download page. The public 0.3.0 source-first preview uses GitHub tagged source archives and the build instructions in the [release notes](release-notes.md); the [release checklist](release-checklist.md) records the November 18 evidence.
+
 Prepared November 12, 2026 for **0.3.0 preview**, build 4. A private, unpublished draft named `v0.3.0-preview` is prepared under [GitHub Releases](https://github.com/Figo5/borrow/releases) with ten assets. The repository remains private and no tag reference was created. This draft does not validate closed-lid behavior or publish the preview.
 
 The combined review folder is `dist/preview-2026-11-12/`:

@@ -1,5 +1,7 @@
 # Borrow software handoff
 
+> **Historical report — November 12, 2026.** Preserved as written. Its deferred video and physical-trial statements are historical; see the [release notes](release-notes.md) and [release checklist](release-checklist.md) for the November 18 source-first preview.
+
 Updated November 12, 2026 · 0.3.0 preview · software revision `7e9b97a`
 
 The user deferred the physical trial, reviewed the software handoff, and approved committing and pushing the private preview on November 11. Borrow remains private and Ousel remains unarchived. Tags, public releases, and visibility changes are outside this approval.

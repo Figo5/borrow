@@ -1,36 +1,49 @@
-# Borrow 0.3.0 preview — draft release notes
+# Borrow 0.3.0 preview — source-first prerelease notes
 
-**Draft only: not published.** Software revision `7e9b97a`; physical compatibility and the final demonstration remain pending.
+Prepared November 18, 2026 · `v0.3.0-preview` · [Case study](https://gfiore.com/borrow) · [Hardware report](https://gfiore.com/projects/borrow-hardware-comparison.md)
 
-Borrow records what happened to a local task and can request a bounded wake hold for its recording. Choose recording-only **Off**, supported **Idle**, or **Experimental AC** mode. Borrow releases its own hold when the recording ends or its deadline expires, retaining separate evidence about work, process/logged lifecycle, power notifications, and hold release.
+Borrow records a local task and can request a bounded wake hold for the recording. Choose recording-only **Off**, supported **Idle**, or **Experimental AC**. Borrow releases only its own hold and keeps work, process or logged lifecycle, power notifications, sampling gaps, and hold release as separate findings.
 
-Idle mode prevents automatic idle sleep; it does not guarantee execution with the lid closed. Experimental AC mode explores the system-sleep assertion used by Apple's `caffeinate` tool. Apple's current SDK deprecates that underlying assertion, so charger-only/no-display compatibility is experimental and must be physically validated for the setup. See the [research](sleep-control-research.md).
+**Source-first.** Build locally from the tagged source ZIP, tarball, or Git checkout. The local build uses an ad-hoc signature.
 
-**Hold released** means Borrow stopped requesting its hold. Other applications, settings, or activity can keep the Mac awake. Borrow does not force sleep or independently certify the agent's work.
+## Build from source
 
-## Candidate contents
+Requires macOS 14 or later and Swift 6 through Xcode or Command Line Tools. No third-party dependencies.
 
-- Native SwiftUI app and bundled foreground recorder.
-- Independent-worker rehearsal, foreground-command recording, and explicitly selected read-only Codex log observation.
-- Bounded hold modes and reportable hold lifecycle evidence.
-- Architecture-labelled ZIP, compatibility `Borrow.zip`, `SHA256SUMS`, and `BUILD-INFO.txt`.
+```sh
+git clone --branch v0.3.0-preview https://github.com/Figo5/borrow.git
+cd borrow
+swift test --scratch-path "$(mktemp -d)"
+bash scripts/build-app.sh
+open dist/Borrow.app
+```
 
-The review bundle contains separately labelled `Borrow-0.3.0-macOS-arm64.zip` and `Borrow-0.3.0-macOS-x86_64.zip`, `Borrow-0.3.0-source.zip`, architecture-specific build metadata, source-input hashes and combined SHA-256 checksums. See [artifact provenance and review status](preview-artifacts.md). The compatibility `Borrow.zip` remains in each individual build's output; it is omitted from the combined bundle to avoid an ambiguous architecture.
+You can also download the source ZIP or tarball from the [release tag](https://github.com/Figo5/borrow/releases/tag/v0.3.0-preview). The build is ad-hoc signed; it is not Developer ID signed or notarized. See [installation](installation.md).
 
-Build from source using the [installation guide](installation.md). This preview is ad-hoc signed, not Developer ID signed or notarized. A local Apple Silicon package and a hosted Intel package are distinct builds; availability of one does not imply both were validated.
+## Demo script and command report
 
-## Validation to fill before publication
+```sh
+swift build
+bash scripts/demo-recording.sh "$(swift build --show-bin-path)/borrow"
+```
 
-| Evidence | Candidate status |
+The script records two real foreground commands with wake holds and connectivity checks off, then prints one report path per case.
+
+The corrected native command report uses the command findings: the title is the foreground executable's basename, and `Command exit` records `/usr/bin/true` as observed with exit 0 and `/usr/bin/false` as failed with exit 1. `recording.json` stores the run kind as `command`. If no exit is observed before cancellation or timeout, it remains unverified rather than failed. Process exit does not establish task correctness or child-process completion.
+
+## Validation
+
+| Evidence | Result |
 | --- | --- |
-| Automated/native tests and owned hold cleanup | Final revision: 73 local tests passed with native power integration enabled on November 12. Earlier 17 release-binary OS smoke cases and late-exit/privacy/startup regressions passed. |
-| Build and packaging | Clean Apple Silicon build and extraction verification passed November 12. [Hosted Intel checks](https://github.com/Figo5/borrow/actions/runs/43086166624) passed on the same revision, including default tests, extraction verification and artifact upload. |
-| Five-to-ten-minute real-agent closed-lid run | Deferred by the operator on November 11 |
-| Actual post-task sleep | Unverified until separately observed |
-| Native software UI | Fresh Apple Silicon build verified all modes, hold state/deadline, Stop, Quit cleanup, export and external-recorder ownership. Live Codex observation recorded three new tool completions and released its idle hold on Stop; agent continued. Zero closed-lid samples. |
-| End-to-end demonstration | Software flow rehearsed; operator deferred capture November 12. Physical chapter awaits the hardware test. |
-| GitHub release/tag/public visibility | Private unpublished draft `v0.3.0-preview` prepared with review assets; no tag reference created and repository remains private |
+| Local tests with native power checks (November 18) | **73 passed**, including native idle assertion acquisition, expiry, and release, plus Experimental AC acquisition and release |
+| Build run during the November 18 hardware experiment | **70 passed and three opt-in tests skipped**; the clean Swift build and test run finished with the lid closed |
+| Off, closed lid | 5m49s sampled span, **299-second** longest sampling gap, **zero** Codex events between closed samples, macOS logged before-sleep and wake; no hold requested |
+| Experimental AC, closed lid | **7m04s** sampled span, **10** Codex events between closed samples, clean build and test completed, macOS logged before-sleep and wake; Borrow hold release confirmed |
 
-The earlier 30-second rehearsal observed 15 worker ticks while sampled closed and a matching final artifact. An existing `caffeinate` hold and DarkWake were present, so that run does not establish Borrow-only keep-awake behavior or long-run agent connectivity.
+Observed setup: **one Mac14,9 on AC power, macOS 27.0.1, with only the built-in display detected at preflight.**
 
-Please report the exact mode, Mac/OS, power/display setup, and the specific finding that was unexpected. Review exported reports before sharing; do not attach raw agent journals or prompts. See [privacy](privacy.md) and the [release checklist](release-checklist.md).
+Unverified: physical unplug, battery-only operation, provider connectivity, and immediate sleep after release. Hold release permits normal sleep; it does not establish that sleep occurred.
+
+The [November 12 preview artifacts](preview-artifacts.md) and [software handoff](software-handoff.md) are preserved as historical reports for the older build and are not current release guidance.
+
+Report the exact mode, Mac and OS, power and display setup, and the finding that was unexpected. Review exported reports before sharing; do not attach raw agent journals or prompts. See [privacy](privacy.md) and the [release checklist](release-checklist.md).

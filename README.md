@@ -4,7 +4,11 @@
 
 Borrow is a native Swift macOS app that gives a local task a temporary wake hold and records what happened. Rehearse a lid-close setup, record a foreground command, or follow one selected Codex session. Keep the evidence in a local, exportable report.
 
-**Development preview.** Supported idle-sleep prevention does not prevent lid-close sleep. The stronger AC-only mode is experimental and needs a real test on your Mac. Closed-lid compatibility, uninterrupted agent connections, and actual sleep after release are separate observations.
+**0.3.0 source-first preview.** [Read the case study](https://gfiore.com/borrow) · [Get the 0.3.0-preview source release](https://github.com/Figo5/borrow/releases/tag/v0.3.0-preview)
+
+Build from the tagged source archive or Git checkout. The local build uses an ad-hoc signature. Supported idle-sleep prevention does not prevent lid-close sleep. The stronger AC-only mode is experimental and needs a real test on your Mac. Closed-lid compatibility, uninterrupted agent connections, and actual sleep after release are separate observations.
+
+On November 18, Borrow recorded two closed-lid runs on one Mac14,9 on AC power, running macOS 27.0.1 with only the built-in display detected at preflight. Off recorded a 299-second sampling gap. Experimental AC sampled the lid closed for 7m 04s, and a clean build and test run finished during that span. macOS logged before-sleep and wake notifications in both runs. See the [hardware report](https://gfiore.com/projects/borrow-hardware-comparison.md).
 
 ## First run
 
@@ -25,7 +29,7 @@ open dist/Borrow.app
 
 The report credits worker progress only between two samples that both observed the lid closed. It preserves power notifications and sampling gaps separately. A successful short trial establishes only that setup and interval.
 
-The local app is ad-hoc signed. A Developer ID signed, notarized download is not available yet. See [installation and removal](docs/installation.md) for the source-first preview and build details.
+The build is ad-hoc signed. A Developer ID signed, notarized download is not available. See [installation and removal](docs/installation.md) for the source-first preview and build details.
 
 ## Choose a wake hold
 
@@ -100,13 +104,15 @@ Atomic snapshots refresh roughly every five seconds and on orderly completion. A
 `BorrowCore` owns evidence, power probes, wake leases, and recording. `BorrowCLI` runs a foreground command or observes a journal. `BorrowApp` supplies native SwiftUI controls. The build script uses temporary scratch storage to avoid signing failures caused by synced-folder metadata.
 
 - [Validation evidence](docs/validation.md) and [the first physical test](docs/physical-lid-close.md).
+- [November 18 case study](https://gfiore.com/borrow) and [closed-lid hardware report](https://gfiore.com/projects/borrow-hardware-comparison.md).
+- [Release notes](docs/release-notes.md) and [release checklist](docs/release-checklist.md).
 - [Claude/OpenCode review and corrections](docs/claude-opencode-review.md).
-- [Current software handoff and deferred checks](docs/software-handoff.md).
+- [November 12 software handoff (historical)](docs/software-handoff.md).
 - [Real-agent test protocol and result status](docs/physical-agent-validation.md).
 - [Demo plan and completion status](docs/demo.md).
-- [Release checklist](docs/release-checklist.md) and [changelog](CHANGELOG.md).
+- [Changelog](CHANGELOG.md).
 - [Product brief](docs/product-brief.md), competitive boundaries, and Ousel replacement gate.
 
-The first physical test observed 15 worker ticks in a short charger-connected closed interval under an existing keep-awake environment. It does not validate Borrow's new experimental hold. New physical results and the demo remain pending until actually collected. Wider compatibility needs other machines, networks, and power configurations.
+The November 18 comparison is the first closed-lid evidence for the experimental hold: one Mac, charger power, built-in display. It does not establish physical unplug, battery-only use, provider connectivity, or immediate sleep after release. The earlier 30-second test under an existing `caffeinate` hold remains separately documented and does not validate Borrow's experimental hold.
 
 MIT licensed.
