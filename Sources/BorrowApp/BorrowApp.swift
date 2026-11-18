@@ -309,7 +309,7 @@ struct BorrowWindow: View {
                 Text(run.statusLabel).font(.callout.weight(.medium)).foregroundStyle(.secondary)
             }
             if run.status == .running {
-                Label(stale ? "Recorder snapshot is stale; its current condition is unknown." : run.kind == .codexSession ? "Observing new Codex events. Borrow does not control the agent." : "Rehearsal recording. Keep the lid open for your first run; review the evidence when it ends.",
+                Label(runningDetail(for: run, stale: stale),
                       systemImage: stale ? "questionmark.circle" : "record.circle")
                     .foregroundStyle(accent)
                 if !model.ownsRecorder(for: run) {
@@ -319,10 +319,15 @@ struct BorrowWindow: View {
             }
             if let power = run.power { WakeHoldStatus(power: power, stale: stale) }
             HStack(spacing: 32) {
-                if run.kind == .codexSession {
+                switch run.kind {
+                case .codexSession:
                     metric("New agent events", value: "\(run.agent?.activityCount ?? 0)")
                     metric("Events while closed", value: "\(run.closedLidAgentEvents)")
-                } else {
+                case .command:
+                    metric("Exit code",
+                           value: run.exitCode.map { String($0) } ?? "—",
+                           accessibilityValue: run.exitCode.map { String($0) } ?? "Not observed")
+                case .rehearsal:
                     metric("Worker ticks while closed", value: "\(run.closedLidHeartbeats)")
                 }
                 metric("Samples", value: "\(run.observations.count)")
@@ -348,10 +353,26 @@ struct BorrowWindow: View {
                 .font(.caption).foregroundStyle(.secondary).padding(.top, 8)
         }
     }
-    private func metric(_ label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func runningDetail(for run: RunRecord, stale: Bool) -> String {
+        if stale { return "Recorder snapshot is stale; its current condition is unknown." }
+        switch run.kind {
+        case .codexSession: return "Observing new Codex events. Borrow does not control the agent."
+        case .command: return "Command recording. Waiting for the foreground process to exit; an exit status alone does not establish that the task succeeded."
+        case .rehearsal: return "Rehearsal recording. Keep the lid open for your first run; review the evidence when it ends."
+        }
+    }
+    @ViewBuilder
+    private func metric(_ label: String, value: String, accessibilityValue: String? = nil) -> some View {
+        let tile = VStack(alignment: .leading, spacing: 6) {
             Text(value).font(.system(size: 26, weight: .medium, design: .rounded)).monospacedDigit()
             Text(label).font(.caption).foregroundStyle(.secondary)
+        }
+        if let accessibilityValue {
+            tile.accessibilityElement(children: .combine)
+                .accessibilityLabel(label)
+                .accessibilityValue(accessibilityValue)
+        } else {
+            tile
         }
     }
 }
