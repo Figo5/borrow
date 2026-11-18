@@ -43,8 +43,16 @@ Closing the window keeps this app instance's bounded recorder running. **Quit Bo
 
 ## Record a command
 
+To see how Borrow reports successful and failed command exits, build the CLI and run the demo. It prints paths to two reports from real foreground commands with wake holds and connectivity checks off.
+
 ```sh
 swift build
+bash scripts/demo-recording.sh "$(swift build --show-bin-path)/borrow"
+```
+
+Use the CLI directly to rehearse, record a command, or observe a Codex session.
+
+```sh
 .build/debug/borrow rehearse --duration 30 --wake idle
 .build/debug/borrow run --timeout 600 --wake idle -- /usr/bin/make test
 .build/debug/borrow observe-codex --session /path/to/selected-session.jsonl --timeout 600 --wake experimental-ac
